@@ -42,12 +42,18 @@ public class CompanyRep extends User{
 
     }
 
-    public void toggleInternshipVisibility(Internships x){
-
+    public void toggleInternshipVisibility(Internships internship){
+        internship.toggleVisibility();
     }
 
     public List<Internships> getInternships(){
         return internships;
     }
+
+    public void viewInternship(Internships internship){
+        //need do StudentApplication first then get information from there
+    }
+
+    //need implement another method to approve or reject student's application
 
 }
