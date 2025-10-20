@@ -1,12 +1,24 @@
+import java.util.List;
+import java.util.ArrayList;
 
-public class CompanyRep {
+public class CompanyRep extends User{
 
     // instance variables
     private String companyName;
     private boolean isApproved;
+    private List<Internships> internships;
 
+    public CompanyRep() {
+        this.internships = new ArrayList<>();
+    }
 
     // methods
+    public boolean getIsApproved() {
+        return isApproved;
+    }
+    public void setIsApproved(boolean isApproved) {
+        this.isApproved = isApproved;
+    }
 
     public String getCompanyName() {
         return companyName;
@@ -22,7 +34,7 @@ public class CompanyRep {
         }
     }
 
-    public void createinternships(){
+    public void createInternships(){
 
     }
 
@@ -30,10 +42,12 @@ public class CompanyRep {
 
     }
 
-    public void toggleInternshipVisibility(){
+    public void toggleInternshipVisibility(Internships x){
 
     }
 
-    
+    public List<Internships> getInternships(){
+        return internships;
+    }
 
 }
