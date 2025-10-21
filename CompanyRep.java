@@ -1,3 +1,5 @@
+import enums.InternshipLevel;
+import enums.OpportunityStatus;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -34,11 +36,45 @@ public class CompanyRep extends User{
         }
     }
 
-    public void createInternships(){
+    public void createInternships(String title, String description, InternshipLevel internshipLevel, 
+                                    String preferredMajor, int openingDate, int closingDate, int slots){
+        if (!isApproved) {
+            System.out.println("Company must be approved first in order to create internships.");
+            return;
+        }
+        if (internships.size()>=5) {
+            System.out.println("Max of 5 internships can be created per company.");
+            return;
+        }
+        if (slots>10) {
+            System.out.println("Max of 10 slots can be set for each internship.");
+            return;
+        }
+
+        int formattedOpeningDate = convertDateFormat(openingDate);
+        int formattedClosingDate = convertDateFormat(closingDate);
+
+        if (formattedOpeningDate>=formattedClosingDate) {
+            System.out.println("Opening date must be before the closing date.");
+            return;
+        }
+
+        Internships newInternship = new Internships(title, description, internshipLevel, preferredMajor,
+                                                    openingDate, closingDate, OpportunityStatus.PENDING, 
+                                                    companyName, new String[]{getUserid()}, slots);
+        internships.add(newInternship);
+        System.out.println("Internship created successfully.");
 
     }
 
-    public void approveRegistration(){
+    private int convertDateFormat(int date) {
+        int day = date/10000;
+        int month = (date%10000)/100;
+        int year = date%100;
+        return year*10000 + month*100 + day;
+    }
+
+    public void approveStudentApplication(){
 
     }
 
@@ -53,7 +89,5 @@ public class CompanyRep extends User{
     public void viewInternship(Internships internship){
         //need do StudentApplication first then get information from there
     }
-
-    //need implement another method to approve or reject student's application
 
 }

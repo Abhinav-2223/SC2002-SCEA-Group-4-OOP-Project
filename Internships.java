@@ -23,13 +23,13 @@ public class Internships {
         this.isApprovedByStaff = false;
     }
 
-    public Internships(String title, String description, InternshipLevel internLevel, 
+    public Internships(String title, String description, InternshipLevel internshipLevel, 
                       String preferredMajor, int openingDate, int closingDate, 
                       OpportunityStatus opportunityStatus, String companyName, 
                       String[] companyReps, int slots) {
         this.title = title;
         this.description = description;
-        this.internLevel = internLevel;
+        this.internshipLevel = internshipLevel;
         this.preferredMajor = preferredMajor;
         this.openingDate = openingDate;
         this.closingDate = closingDate;
@@ -49,8 +49,8 @@ public class Internships {
         return description;
     }
 
-    public InternshipLevel getInternLevel() {
-        return internLevel;
+    public InternshipLevel getInternshipLevel() {
+        return internshipLevel;
     }
 
     public String getPreferredMajor() {
@@ -97,8 +97,8 @@ public class Internships {
         this.description = description;
     }
 
-    public void setInternLevel(InternshipLevel internLevel) {
-        this.internLevel = internLevel;
+    public void setInternshipLevel(InternshipLevel internshipLevel) {
+        this.internshipLevel = internshipLevel;
     }
 
     public void setPreferredMajor(String preferredMajor) {
@@ -146,8 +146,23 @@ public class Internships {
     }
 
     public boolean isPastClosingDate() {
-        //how to check if the current data is past the closing data?
-        return false;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        int currentDay = now.getDayOfMonth();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear()%100;
+
+        int currentDate = currentYear*10000 + currentMonth*100 + currentDay;
+        int formattedCurrentDate = convertDateFormat(currentDate);
+        int formattedClosingDate = convertDateFormat(closingDate);
+
+        return formattedCurrentDate>formattedClosingDate;
+    }
+
+    private int convertDateFormat(int date) {
+        int day = date/10000;
+        int month = (date%10000)/100;
+        int year = date%100;
+        return year*10000 + month*100 + day;
     }
 
     public void decreaseSlots() {
