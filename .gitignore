@@ -1,0 +1,15 @@
+# IntelliJ project files (auto-generated per user)
+.idea/
+*.iml
+
+# Build output directories
+/out/
+/build/
+/target/
+
+# Java compiled files
+*.class
+
+# OS junk
+.DS_Store
+Thumbs.db
