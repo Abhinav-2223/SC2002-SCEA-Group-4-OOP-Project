@@ -41,6 +41,5 @@ public class IPMSystemApp {
         if(isLoggedIn){
             System.out.println("Logged in [DEBUG]");
         }
-
     }
 }

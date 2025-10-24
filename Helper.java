@@ -1,4 +1,4 @@
-import enums.RepRegistrationStatus;
+import enums.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
