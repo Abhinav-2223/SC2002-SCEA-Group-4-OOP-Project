@@ -4,6 +4,8 @@ public abstract class User {
     private String userid;
     private String password;
     private String name;
+    private String domain; // Student, CompanyRep, Staff
+
 
     // getters & setters
     public String getUserid() { return this.userid; }
@@ -11,6 +13,7 @@ public abstract class User {
     public String getName() { return this.name; }
 
     public void setUserid(String userid) { this.userid = userid; }
+
     public void setPassword(String password) { this.password = password; }
     public void setName(String name) { this.name = name; }
 
@@ -23,7 +26,7 @@ public abstract class User {
         System.out.println("Signup successful!");
     }
 
-    public void login(String userid, String password) {
+    public void login(String userid, String password, String domain) {
         // use the getter methods to access the instance variables
         if (this.getUserid().equals(userid) && this.getPassword().equals(password)) {
             System.out.println("Login successful!");
