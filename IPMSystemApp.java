@@ -1,17 +1,15 @@
+import database.FilePaths;
 import enums.*;
 
+import java.io.File;
 import java.util.Scanner;
 
 public class IPMSystemApp {
     public static void main(String[] args){
+
+
         // init
         Scanner scanner = new Scanner(System.in);
-
-        // *NOTE*: update this if csv name changed
-        final String STUDENTS_CSV = "./database/student_list.csv";
-        final String REPS_CSV     = "./database/company_reps_list.csv";
-        final String STAFF_CSV    = "./database/staff_list.csv";
-
         User loggedInUser = null;
         boolean isLoggedIn = false;
 
@@ -29,17 +27,17 @@ public class IPMSystemApp {
             String domain = scanner.nextLine().toLowerCase();
 
             // validation (check if id & pw exists in csvs)
-            isLoggedIn = Helper.csvAuth(username,password,domain,STUDENTS_CSV,REPS_CSV,STAFF_CSV);
+            isLoggedIn = User.userLogin(username,password,domain,FilePaths.STUDENTS_CSV,FilePaths.REPS_CSV,FilePaths.STAFF_CSV);
 
             /*
             TODO:
              login method -> change to use to proper user instance method
-             assign User to the appropriate subclass once logged in (based on id)
+             assign User to the appropriate subclass once logged in (based on domain)
              */
         } while (!isLoggedIn);
 
         if(isLoggedIn){
-            System.out.println("Logged in [DEBUG]");
+            System.out.println("[DEBUG] Log in success");
         }
     }
 }

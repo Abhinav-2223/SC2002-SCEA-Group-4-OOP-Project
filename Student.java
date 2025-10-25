@@ -34,7 +34,6 @@ public class Student {
 
     // Student can view the list of available internships
     public void viewInternshipList() {
-       
 
     }
 

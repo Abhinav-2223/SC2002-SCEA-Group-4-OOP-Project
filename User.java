@@ -1,47 +1,93 @@
-public abstract class User {
+import enums.RepRegistrationStatus;
 
-    // instance variables
-    private String userid;
-    private String password;
-    private String name;
-    private String domain; // Student, CompanyRep, Staff
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public abstract class User {
+    public User() { }
+
+    // fields
+    protected String userid;
+    protected String password;
+    protected String name;
+    protected String domain; // Student, CompanyRep, Staff
 
 
     // getters & setters
     public String getUserid() { return this.userid; }
-    public String getPassword() { return this.password; }
-    public String getName() { return this.name; }
 
     public void setUserid(String userid) { this.userid = userid; }
-
     public void setPassword(String password) { this.password = password; }
     public void setName(String name) { this.name = name; }
 
     // methods
-    public void signup(String userid, String password, String name) {
-        // use the setter methods to set the instance variables
-        this.setUserid(userid);
-        this.setPassword(password);
-        this.setName(name);
+    public void registerUsers(String userid, String password, String name) {
+        // TODO: change reigster to pull directly from csv data (as per pdf reqs)
         System.out.println("Signup successful!");
     }
 
-    public void login(String userid, String password, String domain) {
-        // use the getter methods to access the instance variables
-        if (this.getUserid().equals(userid) && this.getPassword().equals(password)) {
-            System.out.println("Login successful!");
-        } else {
-            System.out.println("Invalid userid or password.");
+    public static boolean userLogin(String id, String password, String domain,
+                                    String studentsCsv, String repsCsv, String staffCsv) {
+        // fields[0] = id, fields[1] = pw for ALL csv, fields[7] = approval for repsCsv ONLY
+        String file;
+        switch (domain) {
+            case "student" -> file = studentsCsv;
+            case "companyrep" -> file = repsCsv;
+            case "staff" -> file = staffCsv;
+            default -> {
+                System.out.println("Invalid Domain!");
+                return false;
+            }
         }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue; // check if csv row empty
+
+                String[] fields = line.split(",", -1); // splits by "," and keep empty columns
+                if (fields.length < 2) continue; // invalid row
+
+                String firstRow = fields[0].trim().toLowerCase();
+                if (firstRow.equals("id")) continue; // skips header
+
+                if (!domain.equals("companyrep")){ // basic validation
+                    if (fields[0].trim().equals(id) && fields[1].trim().equals(password))
+                        return true;
+                } else { // advanced validation for account approval check
+                    if (fields[0].trim().equals(id)
+                            && fields[1].trim().equals(password)
+                            && RepRegistrationStatus.APPROVED.name().equals(fields[7].trim()))
+                        return true;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV: " + e.getMessage());
+        }
+        return false;
     }
 
     public void logout() {
-        System.out.println("Logout successful!");
     }
 
-    public void changePassword(String newPassword) {
-        this.setPassword(newPassword);
-        System.out.println("Password changed successfully!");
+    // TODO: test method
+    public void changePassword(String userId, String domain) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter current password: ");
+        String currentPw = scanner.nextLine();
+
+        // password validation
+        if (currentPw.equals(Helper.csvExtractFields("password",userId,domain))) {
+            // password confirmation
+            System.out.println("Enter new password: ");
+            String newPw = scanner.nextLine();
+
+            System.out.println("Confirm new password: ");
+            if (scanner.nextLine().equals(newPw))
+                this.password = newPw;
+        }
+        System.out.println("Password unchanged!");
     }
 
 
