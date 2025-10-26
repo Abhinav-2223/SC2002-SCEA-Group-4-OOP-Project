@@ -1,12 +1,15 @@
 
+import java.util.ArrayList;
 
 public class Student {
-    
+
     // instance variables
     private String studentId;
     private String name;
     private String major;
     private int studyYear;
+    private ArrayList<StudentApplication> applications = new ArrayList<>();
+
 
     // constructor
     public Student(String studentId, String name, String major, int studyYear) {
@@ -29,39 +32,43 @@ public class Student {
     public int getStudyYear() {
         return studyYear;
     }
+    public ArrayList<StudentApplication> getApplications() {
+        return applications;
+    }
+
 
     // methods 
 
     // Student can view the list of available internships
     public void viewInternshipList() {
-       
+
 
     }
 
 
     // Student can apply for an internship
     public void applyForInternship(Internships internship) {
-        
+
     }
 
     // Student can view the status of their applications
     public void viewApplicationStatus() {
-        
+
     }
-    
+
     // Student can accept an internship placement offer
     public void acceptInternshipPlacement(Internships internship) {
-        
+
     }
 
 
 
     // Student can withdraw their application
     public void requestWithdrawal(Internships internship) {
-        
+
     }
 
-    
+
 
 
 
