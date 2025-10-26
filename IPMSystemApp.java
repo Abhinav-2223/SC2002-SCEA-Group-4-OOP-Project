@@ -1,5 +1,7 @@
 import enums.*;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class IPMSystemApp {
@@ -14,6 +16,9 @@ public class IPMSystemApp {
 
         User loggedInUser = null;
         boolean isLoggedIn = false;
+        String username = "";
+        String password = "";
+        String domain = "";
 
         // auth + validation
         System.out.println("### Internship Management Placement System - IPMS ###");
@@ -22,14 +27,14 @@ public class IPMSystemApp {
         do {
             System.out.println("# Login");
             System.out.print("Enter username: ");
-            String username = scanner.nextLine();
+            username = scanner.nextLine().trim();
             System.out.print("Enter password: ");
-            String password = scanner.nextLine();
+            password = scanner.nextLine().trim();
             System.out.print("Enter domain (Student/CompanyRep/Staff): "); // can be changed to int too, currently string for clarity
-            String domain = scanner.nextLine().toLowerCase();
+            domain = scanner.nextLine().toLowerCase().trim();
 
             // validation (check if id & pw exists in csvs)
-            isLoggedIn = Helper.csvAuth(username,password,domain,STUDENTS_CSV,REPS_CSV,STAFF_CSV);
+            isLoggedIn = Helper.csvAuth(username, password, domain, STUDENTS_CSV, REPS_CSV, STAFF_CSV);
 
             /*
             TODO:
@@ -38,9 +43,44 @@ public class IPMSystemApp {
              */
         } while (!isLoggedIn);
 
-        if(isLoggedIn){
+        if (isLoggedIn) {
             System.out.println("Logged in [DEBUG]");
-        }
 
+
+            if (domain.equals("student")) {
+                Student loggedStudent = loadStudentFromCSV(username, STUDENTS_CSV);
+                if (loggedStudent != null) {
+                    System.out.println("Welcome, " + loggedStudent.getName() + "!");
+                    StudentMenu studentMenu = new StudentMenu(loggedStudent);
+                    studentMenu.startDashboard();
+                } else {
+                    System.out.println("Student not found in CSV file.");
+                }
+            }
+
+        }
+    }
+
+    // helper function to load student info from CSV
+    private static Student loadStudentFromCSV(String studentId, String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+                String[] fields = line.split(",", -1);
+                if (fields[0].equalsIgnoreCase("StudentID")) continue; // skip header
+
+                if (fields[0].trim().equalsIgnoreCase(studentId)) {
+                    String id = fields[0].trim();
+                    String name = fields[1].trim();
+                    String major = fields[2].trim();
+                    int year = Integer.parseInt(fields[3].trim());
+                    return new Student(id, name, major, year);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading student CSV: " + e.getMessage());
+        }
+        return null;
     }
 }
