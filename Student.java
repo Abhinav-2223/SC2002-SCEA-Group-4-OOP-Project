@@ -1,6 +1,6 @@
 
 
-public class Student {
+public class Student extends User {
     
     // instance variables
     private String studentId;
@@ -52,8 +52,6 @@ public class Student {
     public void acceptInternshipPlacement(Internships internship) {
         
     }
-
-
 
     // Student can withdraw their application
     public void requestWithdrawal(Internships internship) {

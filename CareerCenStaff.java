@@ -1,4 +1,4 @@
-//public class CareerCenStaff extends User{
+public class CareerCenStaff extends User{
 //    //fields
 //    private String staffID;
 //
@@ -18,7 +18,7 @@
 //
 //
 //    public void approveIntern(CompanyRep rep, int index ) {
-//        Internship internship = rep.getInternships().get(index);
+//        Internships internship = rep.getInternships().get(index);
 //        internship.setApplicationStatus(ApplicationStatus.SUCCESSFUL);
 //    }
 //
@@ -39,4 +39,4 @@
 //            System.out.println("No internships applied yet.");
 //        }
 //    }
-//}
+}
