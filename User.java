@@ -3,7 +3,6 @@ import enums.RepRegistrationStatus;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public abstract class User {
@@ -91,5 +90,15 @@ public abstract class User {
         System.out.println("Password unchanged!");
     }
 
-    public abstract void handleUserInput(String input);
+
+
+
+
+
+
+
+
+
+
+
 }

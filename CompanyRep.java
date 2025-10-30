@@ -3,7 +3,7 @@ import enums.OpportunityStatus;
 import java.util.List;
 import java.util.ArrayList;
 
-public class CompanyRep extends User {
+public class CompanyRep extends User{
 
     // instance variables
     private String companyName;
