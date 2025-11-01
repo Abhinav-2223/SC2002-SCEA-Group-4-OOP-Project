@@ -1,2 +1,15 @@
-/SC2002-SCEA-Group-4-OOP-Project.iml
-/.idea
+# IntelliJ project files (auto-generated per user)
+.idea/
+*.iml
+
+# Build output directories
+/out/
+/build/
+/target/
+
+# Java compiled files
+*.class
+
+# OS junk
+.DS_Store
+Thumbs.db
