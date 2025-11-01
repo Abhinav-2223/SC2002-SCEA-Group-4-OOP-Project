@@ -36,7 +36,7 @@ public class CompanyRep extends User {
         }
     }
 
-    public void createInternships(String title, String description, InternshipLevel internshipLevel, 
+    public void createInternships(String title, String description, InternshipLevel internshipLevel,
                                     String preferredMajor, int openingDate, int closingDate, int slots){
         if (!isApproved) {
             System.out.println("Company must be approved first in order to create internships.");
@@ -60,7 +60,7 @@ public class CompanyRep extends User {
         }
 
         Internships newInternship = new Internships(title, description, internshipLevel, preferredMajor,
-                                                    openingDate, closingDate, OpportunityStatus.PENDING, 
+                                                    openingDate, closingDate, OpportunityStatus.PENDING,
                                                     companyName, new String[]{getUserid()}, slots);
         internships.add(newInternship);
         System.out.println("Internship created successfully.");

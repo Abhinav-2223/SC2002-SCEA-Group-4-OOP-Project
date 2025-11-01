@@ -1,63 +1,54 @@
-import java.util.ArrayList;
 
 public class Student extends User {
-
-    // instance variables
-    private final String studentId; // make final as studentId, name, major should not change
+    // class
     private final String major;
-    private int studyYear; // can change each year
-    private final ArrayList<StudentApplication> applications = new ArrayList<>();
-    private String acceptedapplications; // to store accepted internship applications
+    private final int studyYear;
 
-
-    // constructor
     public Student(String studentId, String name, String major, int studyYear) {
-        this.studentId = studentId;
-        this.name = name;
+        super(studentId, name, major, "student"); // ← initialize shared fields
         this.major = major;
         this.studyYear = studyYear;
-        this.acceptedapplications = "NONE";
     }
 
     // getters and setters
-    public String getStudentId() {
-        return studentId;
-    }
-    public String getMajor() {
-        return major;
-    }
-    public int getStudyYear() {
-        return studyYear;
-    }
-    public ArrayList<StudentApplication> getApplications() {
-        return applications;
-    }
+    public String getMajor() { return this.major; }
+    public int getStudyYear() { return this.studyYear; }
 
 
-    // methods 
+    // implemented inherited abstract methods
+    @Override
+    public boolean logout(){
+        // TODO: change this to properly match studentUI()
+        return false;
+    }
 
-    // Student can view the list of available internships --> need to figure out how to store internships first
+    // class methods
+    public static void studentUI(){
+        System.out.println("I am Student");
+    }
+    // instance methods
+//     Student can view the list of available internships --> need to figure out how to store internships first
     public void viewInternshipList() {
-        if (Internships.VisibleInternships().isEmpty()) { // check internship storage if empty or if no internships are visible 
+        if (Internships.isVisible().isEmpty()) { // check internship storage if empty or if no internships are visible
             System.out.println("No internships available at the moment.");
             return;
         }else {
-        
+
             System.out.println("Available internships for year " + this.studyYear + " " + this.major + ":");
             boolean foundMatchingInternship = false;
-            
+
             for (Internships internship : Internships.VisibleInternships()) { // iterate through all visible internships
                 // Filter by major and study year
-                if (internship.getPreferredMajor().equalsIgnoreCase(this.major) && 
-                    internship.getPreferredYear() == this.studyYear &&          
+                if (internship.getPreferredMajor().equalsIgnoreCase(this.major) &&
+                    internship.getPreferredYear() == this.studyYear &&
                     internship.canApply()) {
-                    
+
                     internship.displayDetails(); // need to create this method in Internships class
                     System.out.println("-------------------------");
                     foundMatchingInternship = true;
                 }
             }
-            
+
             if (!foundMatchingInternship) {
                 System.out.println("No internships available for year " + this.studyYear + " " + this.major + " at the moment.");
             }
@@ -67,13 +58,13 @@ public class Student extends User {
 
     // Student can apply for an internship --> sent to StudentApplication class --> send to CarreerCenStaff for approval
     public void applyForInternship(Internships internship) {
-        
+
         // check if student has reached max application limit of 3
         if (applications.size() >= 3) {
             System.out.println("Maximum application limit of 3 reached. Cannot apply for more internships.");
             return;
         }
-         
+
         // prevent multiple applications for the same internship
         for (StudentApplication app : applications) {
             if (app.getInternship().equals(internship)) {
@@ -81,7 +72,7 @@ public class Student extends User {
                 return;
             }
         }
-        
+
         // check if internship can be applied to
         if (!internship.canApply()) {
             System.out.println("Cannot apply for this internship. It may be closed or you do not meet the criteria.");
@@ -94,10 +85,10 @@ public class Student extends User {
                 StudentApplication newApplication1n2 = new StudentApplication(this, internship);
                 applications.add(newApplication1n2);
                 System.out.println("Application submitted for internship: " + internship.getTitle());
-            
+
             }else { // non-BASIC level internship cannot be applied by year 1 and 2 students
                 System.out.println("You do not meet the criteria to apply for this internship. (only year 3 and above can apply)");
-                
+
             }
         } else { // year 3 and above students can apply for all levels
             System.out.println("Application submitted for internship: " + internship.getTitle());
@@ -106,9 +97,9 @@ public class Student extends User {
         }
 
     }
-    
 
-    // Student can view the status of their applications -- Need to do:CAN VIEW EVEN AFTER VISIBIITY IS OFF 
+
+    // Student can view the status of their applications -- TODO: FIX CAN VIEW EVEN AFTER VISIBIITY IS OFF
     public void viewApplicationStatus() {
         if (applications.isEmpty()) {
             System.out.println("No applications found.");
@@ -127,7 +118,7 @@ public class Student extends User {
             System.out.println("You have already accepted an internship placement: " + acceptedapplications);
             return;
         }
-        
+
         // Find the application for the given internship
         for (StudentApplication app : applications) {
             if (app.getInternship().equals(internship)) {
@@ -142,7 +133,7 @@ public class Student extends User {
                     System.out.println("No offer available for this internship.");
                     return;
                 }
-                
+
             }
         }
 
@@ -170,15 +161,5 @@ public class Student extends User {
         }
 
         System.out.println("No application found for this internship.");
-
     }
-
-
-
-
-
-
-
-
-
 }
