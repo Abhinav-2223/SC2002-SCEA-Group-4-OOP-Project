@@ -5,7 +5,7 @@ public class Student extends User {
     private final int studyYear;
 
     public Student(String studentId, String name, String major, int studyYear) {
-        super(studentId, name, major, "student"); // ← initialize shared fields
+        super(studentId, name, major, "student"); // initialize shared fields
         this.major = major;
         this.studyYear = studyYear;
     }
