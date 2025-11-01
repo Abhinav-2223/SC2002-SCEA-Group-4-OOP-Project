@@ -6,7 +6,6 @@ public class Internships {
     private String description;
     private InternshipLevel internshipLevel;
     private String preferredMajor;
-    private int preferredYear;
     private int openingDate;
     private int closingDate;
     private OpportunityStatus opportunityStatus;
@@ -25,14 +24,13 @@ public class Internships {
     }
 
     public Internships(String title, String description, InternshipLevel internshipLevel, 
-                      String preferredMajor, int preferredYear, int openingDate, int closingDate, 
+                      String preferredMajor, int openingDate, int closingDate, 
                       OpportunityStatus opportunityStatus, String companyName, 
                       String[] companyReps, int slots) {
         this.title = title;
         this.description = description;
         this.internshipLevel = internshipLevel;
         this.preferredMajor = preferredMajor;
-        this.preferredYear = preferredYear;
         this.openingDate = openingDate;
         this.closingDate = closingDate;
         this.opportunityStatus = opportunityStatus;
@@ -57,9 +55,6 @@ public class Internships {
 
     public String getPreferredMajor() {
         return preferredMajor;
-    }
-    public int getPreferredYear() {
-        return preferredYear;
     }
 
     public int getOpeningDate() {
