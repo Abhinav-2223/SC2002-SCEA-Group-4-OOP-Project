@@ -24,9 +24,9 @@ public class Internships {
         this.isApprovedByStaff = false;
     }
 
-    public Internships(String title, String description, InternshipLevel internshipLevel, 
-                      String preferredMajor, int preferredYear, int openingDate, int closingDate, 
-                      OpportunityStatus opportunityStatus, String companyName, 
+    public Internships(String title, String description, InternshipLevel internshipLevel,
+                      String preferredMajor, int preferredYear, int openingDate, int closingDate,
+                      OpportunityStatus opportunityStatus, String companyName,
                       String[] companyReps, int slots) {
         this.title = title;
         this.description = description;
@@ -42,7 +42,7 @@ public class Internships {
         this.isVisible = false;
         this.isApprovedByStaff = false;
     }
-    
+
     public String getTitle() {
         return title;
     }
@@ -176,5 +176,5 @@ public class Internships {
         }
     }
 
-    
+
 }

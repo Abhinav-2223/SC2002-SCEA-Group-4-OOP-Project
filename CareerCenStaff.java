@@ -2,6 +2,10 @@ import enums.OpportunityStatus;
 import enums.WithdrawalDecision;
 
 public class CareerCenStaff extends User{
+    public CareerCenStaff() {
+
+    }
+
     //fields
     private String staffID;
 
