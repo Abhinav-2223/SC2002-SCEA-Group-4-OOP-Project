@@ -43,5 +43,8 @@ public class CareerCenStaff extends User{
         }
     }
 
-
+    @Override
+    public boolean logout() {
+        return false; //idk how to do this yet
+    }
 }
