@@ -1,5 +1,9 @@
+import enums.InternshipLevel;
 import enums.OpportunityStatus;
 import enums.WithdrawalDecision;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CareerCenStaff extends User{
 
@@ -29,19 +33,53 @@ public class CareerCenStaff extends User{
         System.out.println(app.getStudent().getName() + "'s withdrawal decision has been " + decision);
     }
 
-    public void generateReport(StudentApplication app) { //no ability to sort yet!!
-        System.out.println("Student application ID: " + app.getApplicationID());
-        System.out.println("Student name: " + app.getStudent().getName());
-        System.out.println("Number of internships applied: " + app.getInternship().size()); //internship is not an array yet! cannot retrieve number of internships
-        if (!app.getInternship().isEmpty()) { //need to initialize Internship object as a array!
-            for (int i = 0; i < app.getInternship().size(); i++) {
-                Internships internship = app.getInternship().get(i);
-                System.out.println((i + 1) + ". " + internship.getTitle() + " - Status: " + internship.getOpportunityStatus());
-            }
-        } else {
-            System.out.println("No internships applied yet.");
+
+    public List<Internships> filteringInternships(List<Internships> internships, int choice) {
+        Scanner sc = new Scanner(System.in); //more useful to create a global scanner and feed it, but i write this here for the time being
+        switch (choice) {
+            case 1: //filter by Status
+                System.out.println("Preferred Status: ");
+                String preferredStatus = sc.next();
+                List<Internships> availableInternships;
+                availableInternships = internships.stream().filter(internships1 -> internships1.getOpportunityStatus()
+                                                            == OpportunityStatus.valueOf(preferredStatus.toUpperCase())).toList();
+                return availableInternships;
+
+            case 2: //filter by preferred majors
+                System.out.println("(Case sensitive!) Preferred Major: ");
+                String preferredMajor = sc.next();
+                List<Internships> sortByMajor;
+                sortByMajor = internships.stream().filter(internships1 -> Objects.equals(internships1.getPreferredMajor(), preferredMajor)).toList();
+                return sortByMajor;
+
+            case 3: //filter by Internship level
+                System.out.println("Internship Level: ");
+                String internshipLevel = sc.next();
+                List<Internships> internshipLevelList;
+                internshipLevelList = internships.stream().filter(internships1 -> internships1.getInternshipLevel()
+                        == InternshipLevel.valueOf(internshipLevel.toUpperCase())).toList();
+                return internshipLevelList;
+
+
+            default:
+                System.out.println("Invalid Choice!");
+                return internships;
         }
     }
+
+//    public void generateReport(StudentApplication app) { //no ability to sort yet!!
+//        System.out.println("Student application ID: " + app.getApplicationID());
+//        System.out.println("Student name: " + app.getStudent().getName());
+//        System.out.println("Number of internships applied: " + app.getInternship().size()); //internship is not an array yet! cannot retrieve number of internships
+//        if (!app.getInternship().isEmpty()) { //need to initialize Internship object as a array!
+//            for (int i = 0; i < app.getInternship().size(); i++) {
+//                Internships internship = app.getInternship().get(i);
+//                System.out.println((i + 1) + ". " + internship.getTitle() + " - Status: " + internship.getOpportunityStatus());
+//            }
+//        } else {
+//            System.out.println("No internships applied yet.");
+//        }
+//    }
 
     @Override
     public boolean logout() {
