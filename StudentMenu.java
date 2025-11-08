@@ -13,7 +13,7 @@ public class StudentMenu {
         int choice = -1;
         do {
             System.out.println("\n=== Student Dashboard ===");
-            System.out.println("Welcome, " + student.getName() + " (" + student.getStudentId() + ")");
+            System.out.println("Welcome, " + student.getName() + " (" + student.getUserId() + ")");
             System.out.println("1. View Internship List");
             System.out.println("2. Apply for Internship");
             System.out.println("3. View Application Status");
