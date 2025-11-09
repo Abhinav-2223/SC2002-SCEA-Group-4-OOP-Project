@@ -41,10 +41,9 @@ public class IPMSystemApp {
             // TODO: implement interface for each subclass (distribute workload)!
             switch (user.getDomain()) {
                 case "student":{
-                    System.out.println("User type: " + user.getClass()); // debug line
-                    System.out.println("User ID: " + user.getUserId()); // debug line
-                    System.out.println("Name: " + user.getName()); // debug line
-                    System.out.println("Domain: " + user.getDomain()); // debug line
+                    Student student = (Student) user; // cast to Student
+                    StudentMenu studentMenu = new StudentMenu(student);
+                    studentMenu.startDashboard();
                     break;
                 }
                 case "companyrep":{

@@ -1,13 +1,20 @@
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Student extends User {
     // class
     private final String major;
     private final int studyYear;
+    private List<StudentApplication> applications; // store student's applications
+    private String acceptedapplications; // store accepted internship title
 
     public Student(String studentId, String name, String major, int studyYear) {
         super(studentId, name, major, "student"); // initialize shared fields
         this.major = major;
         this.studyYear = studyYear;
+        this.applications = new ArrayList<>();
+        this.acceptedapplications = "NONE";
     }
 
     // getters and setters
@@ -29,29 +36,38 @@ public class Student extends User {
     // instance methods
 //     Student can view the list of available internships --> need to figure out how to store internships first
     public void viewInternshipList() {
-        if (Internships.isVisible().isEmpty()) { // check internship storage if empty or if no internships are visible
+        //TODO: Need to implement Internships.getAllVisibleInternships() static method
+        List<Internships> visibleInternships = Internships.getAllVisibleInternships();
+        
+        // check if there are any visible internships
+        if (visibleInternships == null || visibleInternships.isEmpty()) {
             System.out.println("No internships available at the moment.");
             return;
-        }else {
+        }
+        
+        System.out.println("Available internships for year " + this.studyYear + " " + this.major + ":");
+        boolean foundMatchingInternship = false;
 
-            System.out.println("Available internships for year " + this.studyYear + " " + this.major + ":");
-            boolean foundMatchingInternship = false;
+        for (Internships internship : visibleInternships) {
+            // Filter by major and study year
+            if (internship.getPreferredMajor().equalsIgnoreCase(this.major) &&
+                internship.getPreferredYear() == this.studyYear &&
+                internship.canApply()) {
 
-            for (Internships internship : Internships.VisibleInternships()) { // iterate through all visible internships
-                // Filter by major and study year
-                if (internship.getPreferredMajor().equalsIgnoreCase(this.major) &&
-                    internship.getPreferredYear() == this.studyYear &&
-                    internship.canApply()) {
-
-                    internship.displayDetails(); // need to create this method in Internships class
-                    System.out.println("-------------------------");
-                    foundMatchingInternship = true;
-                }
+                // Display internship details
+                System.out.println("Title: " + internship.getTitle());
+                System.out.println("Company: " + internship.getCompanyName());
+                System.out.println("Description: " + internship.getDescription());
+                System.out.println("Level: " + internship.getInternshipLevel());
+                System.out.println("Slots: " + internship.getSlots());
+                System.out.println("Closing Date: " + internship.getClosingDate());
+                System.out.println("-------------------------");
+                foundMatchingInternship = true;
             }
+        }
 
-            if (!foundMatchingInternship) {
-                System.out.println("No internships available for year " + this.studyYear + " " + this.major + " at the moment.");
-            }
+        if (!foundMatchingInternship) {
+            System.out.println("No internships available for year " + this.studyYear + " " + this.major + " at the moment.");
         }
     }
 

@@ -1,7 +1,12 @@
 import enums.InternshipLevel;
 import enums.OpportunityStatus;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Internships {
+    // Static storage for all internships
+    private static List<Internships> allInternships = new ArrayList<>();
+    
     private String title;
     private String description;
     private InternshipLevel internshipLevel;
@@ -176,5 +181,26 @@ public class Internships {
         }
     }
 
+    // Static methods for managing internships
+    public static List<Internships> getAllVisibleInternships() {
+        List<Internships> visibleInternships = new ArrayList<>();
+        for (Internships internship : allInternships) {
+            if (internship.isVisible() && internship.isApprovedByStaff()) {
+                visibleInternships.add(internship);
+            }
+        }
+        return visibleInternships;
+    }
 
+    public static void addInternship(Internships internship) {
+        allInternships.add(internship);
+    }
+
+    public static List<Internships> getAllInternships() {
+        return allInternships;
+    }
+
+    public static void clearAllInternships() {
+        allInternships.clear();
+    }
 }
