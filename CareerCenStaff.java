@@ -21,8 +21,8 @@ public class CareerCenStaff extends User{
     }
 
     public void approveIntern(CompanyRep rep, int index ) {
-        Internship internship = rep.getInternships().get(index);
-        internship.setOpportunityStatus(OpportunityStatus.APPROVED);
+        Internships internships = rep.getInternships().get(index);
+        internships.setOpportunityStatus(OpportunityStatus.APPROVED);
         System.out.println(rep.getCompanyName() + "'s " + rep.getInternships().get(index).getTitle() + " opportunity status has been approved");
 
     }
@@ -33,13 +33,13 @@ public class CareerCenStaff extends User{
     }
 
 
-    public List<Internship> filteringInternships(List<Internship> internships, int choice) {
+    public List<Internships> filteringInternships(List<Internships> internships, int choice) {
         Scanner sc = new Scanner(System.in); //more useful to create a global scanner and feed it, but i write this here for the time being
         switch (choice) {
             case 1: //filter by Status
                 System.out.println("Preferred Status: ");
                 String preferredStatus = sc.next();
-                List<Internship> availableInternships;
+                List<Internships> availableInternships;
                 availableInternships = internships.stream().filter(internships1 -> internships1.getOpportunityStatus()
                                                             == OpportunityStatus.valueOf(preferredStatus.toUpperCase())).toList();
                 return availableInternships;
@@ -47,17 +47,17 @@ public class CareerCenStaff extends User{
             case 2: //filter by preferred majors
                 System.out.println("(Case sensitive!) Preferred Major: ");
                 String preferredMajor = sc.next();
-                List<Internship> sortByMajor;
+                List<Internships> sortByMajor;
                 sortByMajor = internships.stream().filter(internships1 -> Objects.equals(internships1.getPreferredMajor(), preferredMajor)).toList();
                 return sortByMajor;
 
             case 3: //filter by Internship level
                 System.out.println("Internship Level: ");
                 String internshipLevel = sc.next();
-                List<Internship> internshipLevelList;
-                internshipLevelList = internships.stream().filter(internships1 -> internships1.getInternshipLevel()
+                List<Internships> internshipsLevelList;
+                internshipsLevelList = internships.stream().filter(internships1 -> internships1.getInternshipLevel()
                         == InternshipLevel.valueOf(internshipLevel.toUpperCase())).toList();
-                return internshipLevelList;
+                return internshipsLevelList;
 
 
             default:

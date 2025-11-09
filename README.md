@@ -36,7 +36,7 @@ Methods:
     - public createInternships()
     - public registerCompany() -> (goes to career cen staff to approve)
     - public approveRegistration()
-    - public toggleInternshipVisibility(Internship x)
+    - public toggleInternshipVisibility(Internships x)
 Fields:
     - private string companyName	
     - private boolean isApproved
@@ -55,7 +55,7 @@ Fields:
 
 # ------------- Other Classes: -------------
 
-## Internship (associated with CompanyRep)
+## Internships (associated with CompanyRep)
 
 Methods:
     - 
@@ -77,7 +77,7 @@ Fields:
 Fields:
     - private String applicationId
     - private Student student
-    - private Internship internship
+    - private Internships internships
     - private ApplicationStatus appStatus (enum)
     - private WithdrawalDecision withdrawDecision (enum)
 Methods: 

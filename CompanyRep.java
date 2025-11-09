@@ -1,9 +1,7 @@
-import enums.ApplicationStatus;
 import enums.InternshipLevel;
 import enums.OpportunityStatus;
 import enums.RepRegistrationStatus;
 
-import java.util.List;
 import java.util.Scanner;
 
 public class CompanyRep extends User {
@@ -84,7 +82,7 @@ public class CompanyRep extends User {
                                   OpportunityStatus oppStatus, int slots, boolean visibility){
         switch (regStatus){
             case RepRegistrationStatus.APPROVED -> {
-                Internship internship = new Internship();
+                Internships internships = new Internships();
 
                 // TODO: do up the logic for inserting into csv etc etc
             }

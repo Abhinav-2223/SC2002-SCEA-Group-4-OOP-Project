@@ -1,7 +1,7 @@
 import enums.InternshipLevel;
 import enums.OpportunityStatus;
 
-public class Internship {
+public class Internships {
     // TODO: fix all these
     private String title;
     private String description;
@@ -19,10 +19,10 @@ public class Internship {
 
     // note: each internship can have >= 1 companyrep representing it
     // TODO: check and edit this
-    public Internship(String title, String description, InternshipLevel internshipLevel,
-                      String preferredMajor, int preferredYear, int openingDate, int closingDate,
-                      OpportunityStatus oppStatus, String companyName,
-                      String[] companyReps, int slots, boolean visibility) {
+    public Internships(String title, String description, InternshipLevel internshipLevel,
+                       String preferredMajor, int preferredYear, int openingDate, int closingDate,
+                       OpportunityStatus oppStatus, String companyName,
+                       String[] companyReps, int slots, boolean visibility) {
         this.title = title;
         this.description = description;
         this.internshipLevel = internshipLevel;
