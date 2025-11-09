@@ -6,8 +6,9 @@ public class Student extends User {
     // class
     private final String major;
     private final int studyYear;
-    private List<StudentApplication> applications; // store student's applications
+    private final List<StudentApplication> applications; // store student's applications
     private String acceptedapplications; // store accepted internship title
+    private static boolean internshipsInitialized = false; // track if test internships are loaded
 
     public Student(String studentId, String name, String major, int studyYear) {
         super(studentId, name, major, "student"); // initialize shared fields
@@ -15,6 +16,13 @@ public class Student extends User {
         this.studyYear = studyYear;
         this.applications = new ArrayList<>();
         this.acceptedapplications = "NONE";
+        
+        // Initialize test internships for student class testing --> remove later
+        if (!internshipsInitialized) {
+            System.out.println("Initializing test internships...");
+            Internships.initializeTestInternships();
+            internshipsInitialized = true;
+        }
     }
 
     // getters and setters
@@ -44,7 +52,7 @@ public class Student extends User {
             System.out.println("No internships available at the moment.");
             return;
         }
-        
+
         System.out.println("Available internships for year " + this.studyYear + " " + this.major + ":");
         boolean foundMatchingInternship = false;
 

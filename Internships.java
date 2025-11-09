@@ -181,6 +181,106 @@ public class Internships {
         }
     }
 
+
+    // == Static Method for Test Data Initialization ==
+    public static void initializeTestInternships() {
+        // Clear existing internships
+        clearAllInternships();
+        
+        // Test Internship 1 - Computer Science, Year 2, BASIC
+        Internships intern1 = new Internships(
+            "Software Developer Intern",
+            "Work on web development projects using Java and Spring Boot",
+            InternshipLevel.BASIC,
+            "Computer Science",
+            2,
+            20250101,  // Opening date: 01/01/2025
+            20251231,  // Closing date: 31/12/2025
+            OpportunityStatus.APPROVED,
+            "Tech Corp",
+            new String[]{"john@techcorp.com"},
+            5
+        );
+        intern1.setVisible(true);
+        intern1.setApprovedByStaff(true);
+        addInternship(intern1);
+        
+        // Test Internship 2 - Computer Science, Year 3, INTERMEDIATE
+        Internships intern2 = new Internships(
+            "Backend Developer",
+            "Develop RESTful APIs and microservices",
+            InternshipLevel.INTERMEDIATE,
+            "Computer Science",
+            3,
+            20250115,  // Opening date: 15/01/2025
+            20251215,  // Closing date: 15/12/2025
+            OpportunityStatus.APPROVED,
+            "Innovation Labs",
+            new String[]{"hr@innovationlabs.com"},
+            3
+        );
+        intern2.canApply();
+        intern2.setVisible(true);
+        intern2.setApprovedByStaff(true);
+        addInternship(intern2);
+        
+        // Test Internship 3 - Business, Year 2, BASIC
+        Internships intern3 = new Internships(
+            "Business Analyst Intern",
+            "Assist in market research and business strategy",
+            InternshipLevel.BASIC,
+            "Business",
+            2,
+            20250201,  // Opening date: 01/02/2025
+            20251130,  // Closing date: 30/11/2025
+            OpportunityStatus.APPROVED,
+            "Global Consulting",
+            new String[]{"careers@globalconsulting.com"},
+            4
+        );
+        intern3.setVisible(true);
+        intern3.setApprovedByStaff(true);
+        addInternship(intern3);
+        
+        // Test Internship 4 - Computer Science, Year 4, ADVANCED
+        Internships intern4 = new Internships(
+            "Machine Learning Engineer",
+            "Research and implement ML algorithms for production systems",
+            InternshipLevel.ADVANCED,
+            "Computer Science",
+            4,
+            20250110,  // Opening date: 10/01/2025
+            20251220,  // Closing date: 20/12/2025
+            OpportunityStatus.APPROVED,
+            "AI Solutions Inc",
+            new String[]{"talent@aisolutions.com"},
+            2
+        );
+        intern4.setVisible(true);
+        intern4.setApprovedByStaff(true);
+        addInternship(intern4);
+        
+        // Test Internship 5 - Engineering, Year 2, BASIC (Closed - for testing)
+        Internships intern5 = new Internships(
+            "Mechanical Engineering Intern",
+            "CAD design and prototype testing",
+            InternshipLevel.BASIC,
+            "Engineering",
+            2,
+            20240101,  // Opening date: 01/01/2024
+            20240630,  // Closing date: 30/06/2024 (PAST DATE)
+            OpportunityStatus.APPROVED,
+            "Manufacturing Co",
+            new String[]{"jobs@manufacturing.com"},
+            3
+        );
+        intern5.setVisible(true);
+        intern5.setApprovedByStaff(true);
+        addInternship(intern5);
+        
+        System.out.println(" Test internships initialized: " + allInternships.size() + " internships loaded.");
+    }
+
     // Static methods for managing internships
     public static List<Internships> getAllVisibleInternships() {
         List<Internships> visibleInternships = new ArrayList<>();
