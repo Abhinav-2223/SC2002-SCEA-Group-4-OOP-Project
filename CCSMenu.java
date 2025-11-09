@@ -36,7 +36,9 @@ public class CCSMenu {
                     System.out.println("Enter the name of the Company Rep: ");
                     String companyRepName1 = sc.next();
                     CompanyRep companyRep1 = staff.findCompanyRep(companyRepList, companyRepName1); //NEED TO LOAD FROM COMPANY REP CSV TO FIND IT
-                    staff.authorizeCompanyRep(companyRep1);
+                    System.out.println("Approve Company Rep? (Y/N)");
+                    String choice1 = sc.next();
+                    staff.authorizeCompanyRep(companyRep1, choice1.charAt(0));
                 case 2:
                     System.out.println("Enter the name of the Company Rep: ");
                     String companyRepName2 = sc.next();

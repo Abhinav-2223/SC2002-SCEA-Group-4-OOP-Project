@@ -26,12 +26,22 @@ public class CareerCenStaff extends User{
 
 
 
-    public void authorizeCompanyRep(CompanyRep companyRep) {
-        companyRep.setIsApproved(true);
-        System.out.println(companyRep.getCompanyName() + " has been approved.");
+    public void authorizeCompanyRep(CompanyRep companyRep, char choice) {
+
+        if(choice == 'Y') {
+            companyRep.setIsApproved(true);
+            System.out.println(companyRep.getCompanyName() + " has been approved.");
+        }
+        else if (choice == 'N') {
+            System.out.println("Did not approve " + companyRep.getCompanyName());
+        }
+        else {
+            System.out.println("Invalid choice!");
+        }
     }
 
-    public void approveIntern(CompanyRep rep, int index ) {
+
+    public void approveIntern(CompanyRep rep, int index) {
         Internships internship = rep.getInternships().get(index);
         internship.setOpportunityStatus(OpportunityStatus.APPROVED);
         System.out.println(rep.getCompanyName() + "'s " + rep.getInternships().get(index).getTitle() + " opportunity status has been approved");
