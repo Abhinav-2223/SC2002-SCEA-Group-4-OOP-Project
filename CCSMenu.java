@@ -35,12 +35,12 @@ public class CCSMenu {
                 case 1:
                     System.out.println("Enter the name of the Company Rep: ");
                     String companyRepName1 = sc.next();
-                    CompanyRep companyRep1 = staff.findCompanyRep(companyRepList, companyRepName1); //companyRepList can be found from LoadfromCSV method
+                    CompanyRep companyRep1 = staff.findCompanyRep(companyRepList, companyRepName1); //NEED TO LOAD FROM COMPANY REP CSV TO FIND IT
                     staff.authorizeCompanyRep(companyRep1);
                 case 2:
                     System.out.println("Enter the name of the Company Rep: ");
                     String companyRepName2 = sc.next();
-                    CompanyRep companyRep2 = staff.findCompanyRep(companyRepList, companyRepName2);
+                    CompanyRep companyRep2 = staff.findCompanyRep(companyRepList, companyRepName2);//NEED TO LOAD FROM COMPANY REP CSV TO FIND IT
                     System.out.println("Enter the Internship to approve: ");
                     if (companyRep2 == null) {
                         System.out.println("Company representative not found!");
@@ -77,7 +77,7 @@ public class CCSMenu {
                     System.out.println("Enter the student name or application ID: ");
                     String studentKey = sc.next();
                     StudentApplication selectedApp = null;
-                    for (StudentApplication app : applicationList) { //need a global list storing student applications!
+                    for (StudentApplication app : applicationList) { //NEED TO LOAD FROM APPLICATION LIST CSV
                         if (app.getStudent().getName().equalsIgnoreCase(studentKey) || app.getApplicationID().equalsIgnoreCase(studentKey)) {
                             selectedApp = app; //selectedApp of the student
                             break;
@@ -97,7 +97,7 @@ public class CCSMenu {
                     sc.nextLine(); // clear newline buffer
 
                     // Call the updated CareerCenStaff method
-                    List<Internships> filteredList = staff.filteringInternships(companyRepList, filterChoice);
+                    List<Internships> filteredList = staff.filteringInternships(companyRepList, filterChoice);//NEED TO LOAD FROM COMPANY REP CSV
 
                     // Display results (CareerCenStaff already prints them, but this is optional confirmation)
                     if (filteredList.isEmpty()) {

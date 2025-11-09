@@ -48,7 +48,7 @@ public class CareerCenStaff extends User{
         Scanner sc = new Scanner(System.in); //more useful to create a global scanner and feed it, but i write this here for the time being
         // Step 1: Flatten all internships from all companies into a single list
         List<Internships> allInternships = new ArrayList<>();
-        for (CompanyRep companyRep : companyRepList) { // again, we need a global list containing companyrep, either from csv or here
+        for (CompanyRep companyRep : companyRepList) { // NEED TO EXTRACT COMPANY REP INFO FROM CSV TO FILTER INTERNSHIPS
             allInternships.addAll(companyRep.getInternships());
         }
         List<Internships> filteredList = new ArrayList<>();
@@ -102,19 +102,6 @@ public class CareerCenStaff extends User{
         return filteredList;
     }
 
-//    public void generateReport(StudentApplication app) { //no ability to sort yet!!
-//        System.out.println("Student application ID: " + app.getApplicationID());
-//        System.out.println("Student name: " + app.getStudent().getName());
-//        System.out.println("Number of internships applied: " + app.getInternship().size()); //internship is not an array yet! cannot retrieve number of internships
-//        if (!app.getInternship().isEmpty()) { //need to initialize Internship object as a array!
-//            for (int i = 0; i < app.getInternship().size(); i++) {
-//                Internships internship = app.getInternship().get(i);
-//                System.out.println((i + 1) + ". " + internship.getTitle() + " - Status: " + internship.getOpportunityStatus());
-//            }
-//        } else {
-//            System.out.println("No internships applied yet.");
-//        }
-//    }
 
     @Override
     public boolean logout() {
