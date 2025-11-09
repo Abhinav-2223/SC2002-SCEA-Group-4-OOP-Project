@@ -6,11 +6,11 @@ public class StudentApplication {
 
     private String applicationID;
     private Student student;
-    private Internships internship;
+    private Internship internship;
     private ApplicationStatus appStatus;
     private WithdrawalDecision withdrawDecision;
 
-    public StudentApplication(Student student, Internships internship) {
+    public StudentApplication(Student student, Internship internship) {
         this.applicationID = "APP" + String.format("%03d", counter++);
         this.student = student;
         this.internship = internship;
@@ -21,7 +21,7 @@ public class StudentApplication {
     //getters
     public String getApplicationID() { return applicationID; }
     public Student getStudent() { return student; }
-    public Internships getInternship() { return internship; }
+    public Internship getInternship() { return internship; }
     public ApplicationStatus getAppStatus() { return appStatus; }
     public WithdrawalDecision getWithdrawDecision() { return withdrawDecision; }
 

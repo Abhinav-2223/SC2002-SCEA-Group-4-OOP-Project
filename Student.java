@@ -4,8 +4,8 @@ public class Student extends User {
     private final String major;
     private final int studyYear;
 
-    public Student(String studentId, String name, String major, int studyYear) {
-        super(studentId, name, major, "student"); // initialize shared fields
+    public Student(String studentId, String name, String password, String major, int studyYear) {
+        super(studentId, name, password, "student"); // initialize shared fields
         this.major = major;
         this.studyYear = studyYear;
     }
@@ -29,7 +29,7 @@ public class Student extends User {
     // instance methods
 //     Student can view the list of available internships --> need to figure out how to store internships first
     public void viewInternshipList() {
-        if (Internships.isVisible().isEmpty()) { // check internship storage if empty or if no internships are visible
+        if (Internship.isVisible().isEmpty()) { // check internship storage if empty or if no internships are visible
             System.out.println("No internships available at the moment.");
             return;
         }else {
@@ -37,7 +37,7 @@ public class Student extends User {
             System.out.println("Available internships for year " + this.studyYear + " " + this.major + ":");
             boolean foundMatchingInternship = false;
 
-            for (Internships internship : Internships.VisibleInternships()) { // iterate through all visible internships
+            for (Internship internship : Internship.VisibleInternships()) { // iterate through all visible internships
                 // Filter by major and study year
                 if (internship.getPreferredMajor().equalsIgnoreCase(this.major) &&
                     internship.getPreferredYear() == this.studyYear &&
@@ -57,7 +57,7 @@ public class Student extends User {
 
 
     // Student can apply for an internship --> sent to StudentApplication class --> send to CarreerCenStaff for approval
-    public void applyForInternship(Internships internship) {
+    public void applyForInternship(Internship internship) {
 
         // check if student has reached max application limit of 3
         if (applications.size() >= 3) {
@@ -112,7 +112,7 @@ public class Student extends User {
     }
 
     // Student can accept an internship placement offer
-    public void acceptInternshipPlacement(Internships internship) {
+    public void acceptInternshipPlacement(Internship internship) {
         // Student can only accept 1 internship offer
         if (!acceptedapplications.equals("NONE")) {
             System.out.println("You have already accepted an internship placement: " + acceptedapplications);
@@ -144,7 +144,7 @@ public class Student extends User {
 
 
     // Student can withdraw their application
-    public void requestWithdrawal(Internships internship) {
+    public void requestWithdrawal(Internship internship) {
 
         for (StudentApplication app : applications) {
             if (app.getInternship().equals(internship)) {

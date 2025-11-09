@@ -1,93 +1,97 @@
+import enums.ApplicationStatus;
 import enums.InternshipLevel;
 import enums.OpportunityStatus;
+import enums.RepRegistrationStatus;
+
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Scanner;
 
 public class CompanyRep extends User {
 
     // instance variables
-    private String companyName;
-    private boolean isApproved;
-    private List<Internships> internships;
+    private final String companyName;
+    private final String department;
+    private final String position;
 
-    public CompanyRep() {
-        this.internships = new ArrayList<>();
+    private final RepRegistrationStatus regStatus;
+
+
+
+    // constructor
+    // NOTE: repId === email
+    // internships will be created separately into csv, with repId tied to each internship.
+    public CompanyRep(String repId, String name, String password, String companyName,
+                      String department, String position, RepRegistrationStatus regStatus) {
+        super(repId, name, password, "companyrep");
+        this.companyName = companyName;
+        this.department = department;
+        this.position = position;
+        this.regStatus = regStatus;
     }
 
-    // methods
-    public boolean getIsApproved() {
-        return isApproved;
-    }
-    public void setIsApproved(boolean isApproved) {
-        this.isApproved = isApproved;
+    // getters and setters
+    public String getRepName() { return this.name; }
+    public String getCompanyName() { return this.companyName; }
+    public RepRegistrationStatus getRegStatus() { return this.regStatus; }
+
+
+    // class methods
+    public static void registerCompany(String companyName) {
+        // TODO: create an entry in company_reps_list.csv, let staff approve it (change enum val in csv)
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
+    // instance methods
+    @Override
+    public void runUserUi(Scanner scanner){
+        while() {
+            System.out.println("# Company Rep Dashboard - Welcome: " + this.getRepName() + " #");
+            System.out.println("1. View created internships");
+            System.out.println("2. Create internships");
+            System.out.println("3. Approve/Reject internships");
+            System.out.println("4. Toggle internship visibility");
+            System.out.println("0. Logout");
 
-    public void registerCompany(String companyName) {
-        if (isApproved) {
-            System.out.println("Company is already registered and approved.");
-        } else {
-            this.companyName = companyName;
-            this.isApproved = false; // registration pending approval
-            System.out.println("Company registration submitted for approval.");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // flush buffer
+            switch (choice) {
+                case 1: {
+                    break;
+                }
+                case 2: {
+                    System.out.println("2");
+                    break;
+                }
+                case 3: {
+                    System.out.println("3");
+                    break;
+                }
+                default: {
+
+                }
+            }
         }
     }
 
+    // TODO: double check logic for logging out, implement if any
+    @Override
+    public void logout(){
+
+    }
+
+    // max 5 internships/company, max 10 slots each
     public void createInternships(String title, String description, InternshipLevel internshipLevel,
-                                    String preferredMajor, int openingDate, int closingDate, int slots){
-        if (!isApproved) {
-            System.out.println("Company must be approved first in order to create internships.");
-            return;
+                                  String preferredMajor, int preferredYear, int openingDate, int closingDate,
+                                  OpportunityStatus oppStatus, int slots, boolean visibility){
+        switch (regStatus){
+            case RepRegistrationStatus.APPROVED -> {
+                Internship internship = new Internship();
+
+                // TODO: do up the logic for inserting into csv etc etc
+            }
+            case RepRegistrationStatus.PENDING -> System.out.println("Unable to create internship. Registration PENDING from Career Staff!");
+            case RepRegistrationStatus.REJECTED -> System.out.println("Unable to create internship. Registration REJECTED from Career Staff!");
         }
-        if (internships.size()>=5) {
-            System.out.println("Max of 5 internships can be created per company.");
-            return;
-        }
-        if (slots>10) {
-            System.out.println("Max of 10 slots can be set for each internship.");
-            return;
-        }
-
-        int formattedOpeningDate = convertDateFormat(openingDate);
-        int formattedClosingDate = convertDateFormat(closingDate);
-
-        if (formattedOpeningDate>=formattedClosingDate) {
-            System.out.println("Opening date must be before the closing date.");
-            return;
-        }
-
-        Internships newInternship = new Internships(title, description, internshipLevel, preferredMajor,
-                                                    openingDate, closingDate, OpportunityStatus.PENDING,
-                                                    companyName, new String[]{getUserid()}, slots);
-        internships.add(newInternship);
-        System.out.println("Internship created successfully.");
-
     }
 
-    private int convertDateFormat(int date) {
-        int day = date/10000;
-        int month = (date%10000)/100;
-        int year = date%100;
-        return year*10000 + month*100 + day;
-    }
-
-    public void approveStudentApplication(){
-
-    }
-
-    public void toggleInternshipVisibility(Internships internship){
-        internship.toggleVisibility();
-    }
-
-    public List<Internships> getInternships(){
-        return internships;
-    }
-
-    public void viewInternship(Internships internship){
-        //need do StudentApplication first then get information from there
-    }
 
 }
