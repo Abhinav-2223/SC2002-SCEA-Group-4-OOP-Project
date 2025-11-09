@@ -47,9 +47,9 @@ public class StudentMenu {
         System.out.print("Enter internship title: ");
         String title = scanner.nextLine();
 
-        Internships internship = new Internships();
-        internship.setTitle(title);
-        student.applyForInternship(internship);
+        Internships internships = new Internships();
+        internships.setTitle(title);
+        student.applyForInternship(internships);
     }
 
     private void acceptInternship() {
@@ -57,9 +57,9 @@ public class StudentMenu {
         System.out.print("Enter internship title to accept: ");
         String title = scanner.nextLine();
 
-        Internships internship = new Internships();
-        internship.setTitle(title);
-        student.acceptInternshipPlacement(internship);
+        Internships internships = new Internships();
+        internships.setTitle(title);
+        student.acceptInternshipPlacement(internships);
     }
 
     private void withdrawApplication() {
@@ -67,8 +67,8 @@ public class StudentMenu {
         System.out.print("Enter internship title to withdraw from: ");
         String title = scanner.nextLine();
 
-        Internships internship = new Internships();
-        internship.setTitle(title);
-        student.requestWithdrawal(internship);
+        Internships internships = new Internships();
+        internships.setTitle(title);
+        student.requestWithdrawal(internships);
     }
 }

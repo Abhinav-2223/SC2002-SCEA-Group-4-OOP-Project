@@ -77,7 +77,7 @@ Fields:
 Fields:
     - private String applicationId
     - private Student student
-    - private Internships internship
+    - private Internships internships
     - private ApplicationStatus appStatus (enum)
     - private WithdrawalDecision withdrawDecision (enum)
 Methods: 

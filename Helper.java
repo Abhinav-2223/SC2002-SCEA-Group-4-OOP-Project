@@ -63,14 +63,62 @@ public class Helper {
         }
     }
 
+    // TODO: implement overloaded method to work for Title-based csvs
+    // overloaded csvExtractFields (to work with Title-based csvs for Internships)
+    public static String csvExtractFields(String requestedField, String internshipTitle) {
+        String file = FilePaths.INTERNSHIPS_CSV;  // path to your internship CSV
+        if (internshipTitle == null || internshipTitle.isBlank()) return null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String headerRow = reader.readLine();
+            if (headerRow == null) return null;
+
+            headerRow = headerRow.replace("\uFEFF", ""); // remove BOM if any
+            String[] headers = headerRow.split(",", -1);
+
+            Map<String, Integer> headerIndex = new HashMap<>();
+            for (int i = 0; i < headers.length; i++) {
+                headerIndex.put(headers[i].trim().toLowerCase(), i);
+            }
+
+            Integer titleIndex = headerIndex.get("title");
+            Integer requestedFieldIndex = headerIndex.get(requestedField.trim().toLowerCase());
+
+            if (titleIndex == null || requestedFieldIndex == null) {
+                System.out.println("Missing 'Title' or requested field in Internship CSV.");
+                return null;
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+
+                String[] cols = line.split(",", -1);
+                if (cols.length <= Math.max(titleIndex, requestedFieldIndex)) continue;
+
+                String titleValue = cols[titleIndex].trim();
+                if (titleValue.equalsIgnoreCase(internshipTitle)) {
+                    return cols[requestedFieldIndex].trim();
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            System.out.println("Error reading internship CSV: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+
 
     public static User loadUserFromCSV(String userId, String domain) {
         switch (domain) {
             case "student" -> {
                 String name = csvExtractFields("Name", userId, domain);
                 String major = csvExtractFields("Major", userId, domain);
+                String password = csvExtractFields("Password", userId, domain);
                 int year = Integer.parseInt(Objects.requireNonNull(csvExtractFields("Year", userId, domain)));
-                return new Student(userId, name, major, year);
+                return new Student(userId, name, password, major, year);
             }
             case "companyrep" -> { // TODO: implement when CompanyRep class done properly
 //                String name = csvExtractFields("Name", userId, domain);

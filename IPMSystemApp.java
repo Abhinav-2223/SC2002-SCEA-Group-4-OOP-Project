@@ -2,8 +2,6 @@ import java.util.Scanner;
 
 public class IPMSystemApp {
     public static void main(String[] args){
-
-
         // init
         Scanner scanner = new Scanner(System.in);
         User user;
@@ -14,6 +12,23 @@ public class IPMSystemApp {
         // Main login menu of the app
         do {
             System.out.println("### Internship Management Placement System - IPMS ###");
+            System.out.println("1. Login");
+            System.out.println("2. Company Representative Registration");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // flush buffer
+            switch (choice){
+                case 1:{
+                    break; // breaks out of switch to continue normal flow unimpeded (looks weird but functionally sound in this project)
+                }
+                case 2:{
+                    CompanyRep.registerCompany();
+                    continue;
+                }
+                default:{
+                    System.out.println("Invalid Option");
+                    continue;
+                }
+            }
             System.out.println("# Login");
             System.out.print("Enter username: ");
             String username = scanner.nextLine().trim();
@@ -47,7 +62,8 @@ public class IPMSystemApp {
                     break;
                 }
                 case "companyrep":{
-                    System.out.println("Company Rep");
+                    user.runUserUi(scanner);
+                    isLoggedIn = false;
                     break;
                 }
                 case "staff":{

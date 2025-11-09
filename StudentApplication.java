@@ -6,14 +6,14 @@ public class StudentApplication {
 
     private String applicationID;
     private Student student;
-    private Internships internship;
+    private Internships internships;
     private ApplicationStatus appStatus;
     private WithdrawalDecision withdrawDecision;
 
-    public StudentApplication(Student student, Internships internship) {
+    public StudentApplication(Student student, Internships internships) {
         this.applicationID = "APP" + String.format("%03d", counter++);
         this.student = student;
-        this.internship = internship;
+        this.internships = internships;
         this.appStatus = ApplicationStatus.PENDING;
         this.withdrawDecision = WithdrawalDecision.NONE;
     }
@@ -21,7 +21,7 @@ public class StudentApplication {
     //getters
     public String getApplicationID() { return applicationID; }
     public Student getStudent() { return student; }
-    public Internships getInternship() { return internship; }
+    public Internships getInternship() { return internships; }
     public ApplicationStatus getAppStatus() { return appStatus; }
     public WithdrawalDecision getWithdrawDecision() { return withdrawDecision; }
 
@@ -32,7 +32,7 @@ public class StudentApplication {
     //display info
     public void displayApplicationDetails() {
         System.out.println("Application ID: " + applicationID);
-        System.out.println("Internship: " + internship.getTitle());
+        System.out.println("Internship: " + internships.getTitle());
         System.out.println("Status: " + appStatus);
         System.out.println("Withdrawal Decision: " + withdrawDecision);
     }

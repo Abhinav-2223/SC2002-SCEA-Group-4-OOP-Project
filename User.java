@@ -66,9 +66,10 @@ public abstract class User {
         return false;
     }
 
-    public abstract boolean logout();
+    public abstract void logout();
+    public abstract void runUserUi(Scanner scanner);
 
-    // TODO: test method
+    // TODO: test this method; see if works
     public void changePassword(String userId, String domain) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter current password: ");
