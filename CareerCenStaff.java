@@ -3,7 +3,6 @@ import enums.OpportunityStatus;
 import enums.WithdrawalDecision;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CareerCenStaff extends User{
 
@@ -15,25 +14,15 @@ public class CareerCenStaff extends User{
     }
 
     //methods
-    public CompanyRep findCompanyRep(List<CompanyRep> companyRepList, String companyName) {
-        for (CompanyRep rep : companyRepList) {
-            if (rep.getCompanyName().equalsIgnoreCase(companyName)) {
-                return rep;
-            }
-        }
-        return null; // not found
-    }
-
-
-
+    // this adds the companyRep INTO csv (company_reps_list.csv)
     public void authorizeCompanyRep(CompanyRep companyRep) {
         companyRep.setIsApproved(true);
         System.out.println(companyRep.getCompanyName() + " has been approved.");
     }
 
     public void approveIntern(CompanyRep rep, int index ) {
-        Internships internship = rep.getInternships().get(index);
-        internship.setOpportunityStatus(OpportunityStatus.APPROVED);
+        Internships internships = rep.getInternships().get(index);
+        internships.setOpportunityStatus(OpportunityStatus.APPROVED);
         System.out.println(rep.getCompanyName() + "'s " + rep.getInternships().get(index).getTitle() + " opportunity status has been approved");
 
     }
@@ -46,60 +35,35 @@ public class CareerCenStaff extends User{
 
     public List<Internships> filteringInternships(List<Internships> internships, int choice) {
         Scanner sc = new Scanner(System.in); //more useful to create a global scanner and feed it, but i write this here for the time being
-        // Step 1: Flatten all internships from all companies into a single list
-        List<Internships> allInternships = new ArrayList<>();
-        for (CompanyRep companyRep : companyRepList) { // again, we need a global list containing companyrep, either from csv or here
-            allInternships.addAll(companyRep.getInternships());
-        }
-        List<Internships> filteredList = new ArrayList<>();
         switch (choice) {
-            case 1: // Filter by Status
-                System.out.print("Preferred Status (e.g. APPROVED, PENDING): ");
+            case 1: //filter by Status
+                System.out.println("Preferred Status: ");
                 String preferredStatus = sc.next();
-                filteredList = allInternships.stream()
-                        .filter(internship -> internship.getOpportunityStatus() ==
-                                OpportunityStatus.valueOf(preferredStatus.toUpperCase()))
-                        .toList();
-                break;
+                List<Internships> availableInternships;
+                availableInternships = internships.stream().filter(internships1 -> internships1.getOpportunityStatus()
+                                                            == OpportunityStatus.valueOf(preferredStatus.toUpperCase())).toList();
+                return availableInternships;
 
-            case 2: // Filter by Preferred Major
-                System.out.print("Preferred Major (case-sensitive): ");
+            case 2: //filter by preferred majors
+                System.out.println("(Case sensitive!) Preferred Major: ");
                 String preferredMajor = sc.next();
-                filteredList = allInternships.stream()
-                        .filter(internship -> Objects.equals(internship.getPreferredMajor(), preferredMajor))
-                        .toList();
-                break;
+                List<Internships> sortByMajor;
+                sortByMajor = internships.stream().filter(internships1 -> Objects.equals(internships1.getPreferredMajor(), preferredMajor)).toList();
+                return sortByMajor;
 
-            case 3: // Filter by Internship Level
-                System.out.print("Internship Level: ");
+            case 3: //filter by Internship level
+                System.out.println("Internship Level: ");
                 String internshipLevel = sc.next();
-                filteredList = allInternships.stream()
-                        .filter(internship -> internship.getInternshipLevel() ==
-                                InternshipLevel.valueOf(internshipLevel.toUpperCase()))
-                        .toList();
-                break;
+                List<Internships> internshipsLevelList;
+                internshipsLevelList = internships.stream().filter(internships1 -> internships1.getInternshipLevel()
+                        == InternshipLevel.valueOf(internshipLevel.toUpperCase())).toList();
+                return internshipsLevelList;
+
 
             default:
-                System.out.println("Invalid choice!");
-                return allInternships;
+                System.out.println("Invalid Choice!");
+                return internships;
         }
-
-        // Step 3: Display results, grouped by company
-        if (filteredList.isEmpty()) {
-            System.out.println("No internships match your criteria.");
-        } else {
-            System.out.println("\n--- Filtered Internships ---");
-            for (Internships internship : filteredList) {
-                System.out.println("Company: " + internship.getCompanyName());
-                System.out.println("Title: " + internship.getTitle());
-                System.out.println("Level: " + internship.getInternshipLevel());
-                System.out.println("Preferred Major: " + internship.getPreferredMajor());
-                System.out.println("Status: " + internship.getOpportunityStatus());
-                System.out.println("-----------------------------------");
-            }
-        }
-
-        return filteredList;
     }
 
 //    public void generateReport(StudentApplication app) { //no ability to sort yet!!
