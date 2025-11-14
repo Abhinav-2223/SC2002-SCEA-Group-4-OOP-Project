@@ -10,7 +10,7 @@ public abstract class User {
     protected final String userId;
     protected String password;
     protected final String name;
-    protected final String domain; // "student", "companyrep", "staff" (consider an enum)
+    protected final String domain; // valid domains: "student", "companyrep", "staff"
 
     protected User(String userId, String name, String password, String domain) {
         this.userId = userId;
@@ -66,7 +66,7 @@ public abstract class User {
         return false;
     }
 
-    public abstract void logout();
+    public abstract boolean logout();
     public abstract void runUserUi(Scanner scanner);
 
     // TODO: test this method; see if works

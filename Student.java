@@ -3,15 +3,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Student extends User {
-    // class
     private final String major;
     private final int studyYear;
     private final List<StudentApplication> applications; // store student's applications
     private String acceptedapplications; // store accepted internship title
     private static boolean internshipsInitialized = false; // track if test internships are loaded
 
-    public Student(String studentId, String name, String major, int studyYear) {
-        super(studentId, name, major, "student"); // initialize shared fields
+    // constructor
+    public Student(String studentId, String name, String password, String major, int studyYear) {
+        super(studentId, name, password, "student"); // initialize shared fields
         this.major = major;
         this.studyYear = studyYear;
         this.applications = new ArrayList<>();

@@ -18,10 +18,10 @@ public class IPMSystemApp {
             scanner.nextLine(); // flush buffer
             switch (choice){
                 case 1:{
-                    break; // breaks out of switch to continue normal flow unimpeded (looks weird but functionally sound in this project)
+                    break; // breaks out of switch to continue normal flow
                 }
                 case 2:{
-                    CompanyRep.registerCompany();
+                    CompanyRep.registerCompany(scanner);
                     continue;
                 }
                 default:{
@@ -29,7 +29,7 @@ public class IPMSystemApp {
                     continue;
                 }
             }
-            System.out.println("# Login");
+            System.out.println("# - Login");
             System.out.print("Enter username: ");
             String username = scanner.nextLine().trim();
             System.out.print("Enter password: ");

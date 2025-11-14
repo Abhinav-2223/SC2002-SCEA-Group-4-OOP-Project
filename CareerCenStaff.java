@@ -5,12 +5,16 @@ import enums.WithdrawalDecision;
 import java.util.*;
 
 public class CareerCenStaff extends User{
-
-    //fields all inherited from User
+    private final String role;
+    private final String department;
+    private final String email;
 
     //constructor
-    public CareerCenStaff(String userID, String name, String password, String domain) {
-        super(userID, name, password, domain);
+    public CareerCenStaff(String userID, String name, String password, String role, String department, String email) {
+        super(userID, name, password, "staff");
+        this.role = role;
+        this.department = department;
+        this.email = email;
     }
 
     //methods

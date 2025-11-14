@@ -1,2 +1,2 @@
-ID,Password,Name,CompanyName,Department,Position,regStatus
-bob@testing.com,password,Bob Thomas,Testing Ptd Ltd.,Testing,Tester,APPROVED
+ID,Password,Name,CompanyName,Department,Position,InternshipsCreated,RegStatus
+bob@testing.com,password,Bob Thomas,Testing Ptd Ltd.,Testing,Tester,0,APPROVED
