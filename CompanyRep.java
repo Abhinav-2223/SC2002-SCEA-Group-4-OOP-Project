@@ -254,12 +254,18 @@ public class CompanyRep extends User {
             }
             boolean found = false;
             while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // skip empty lines
                 String[] row = line.split(",", -1);
+                
+                // Check if row has enough columns
+                if (row.length <= repCol) continue;
+                
                 if (row[repCol].equalsIgnoreCase(getCompanyName())) {
                     found = true;
                     // Print all fields for this internship
                     System.out.println("------------------------------");
-                    for (int i = 0; i < row.length; i++) {
+                    int maxIndex = Math.min(row.length, header.length);
+                    for (int i = 0; i < maxIndex; i++) {
                         System.out.printf("%s: %s\n", header[i], row[i]);
                     }
                 }
