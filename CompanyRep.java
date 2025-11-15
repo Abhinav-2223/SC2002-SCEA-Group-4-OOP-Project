@@ -183,9 +183,9 @@ public class CompanyRep extends User {
                 String internshipLevelInput = scanner.nextLine().trim();
                 InternshipLevel internshipLevel = InternshipLevel.valueOf(internshipLevelInput.toUpperCase());
 
-                System.out.print("Enter major preference: ");
+                System.out.print("Enter major preference (e.g. Computer Science): ");
                 String preferredMajor = scanner.nextLine().trim();
-                System.out.print("Enter Year of Study preference: ");
+                System.out.print("Enter Year of Study preference (1/2/3/4): ");
                 String preferredYear = scanner.nextLine().trim();
                 System.out.print("Enter internship opening date (YYYY-MM-DD): ");
                 String openingDate = scanner.nextLine().trim();
