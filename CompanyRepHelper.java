@@ -39,7 +39,7 @@ public class CompanyRepHelper {
             return;
         }
 
-        // === Update the specified field ===
+        // Update the specified field
         for (int i = 1; i < rows.size(); i++) {   // skip header
             String[] row = rows.get(i);
 
@@ -49,7 +49,7 @@ public class CompanyRepHelper {
             }
         }
 
-        // === Write back to CSV ===
+        // Write back to CSV
         try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.REPS_CSV))) {
             for (String[] row : rows) {
                 pw.println(String.join(",", row));
@@ -63,7 +63,7 @@ public class CompanyRepHelper {
         List<String[]> rows = new ArrayList<>();
         int targetColumn = -1;
 
-        // === Read CSV ===
+        // Read CSV
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
             String line;
 
@@ -96,7 +96,7 @@ public class CompanyRepHelper {
             return;
         }
 
-        // === Update the specified field (matching by Internship Title) ===
+        // Update the specified field (matching by Internship Title)
         for (int i = 1; i < rows.size(); i++) {   // skip header
             String[] row = rows.get(i);
 
@@ -107,7 +107,7 @@ public class CompanyRepHelper {
             }
         }
 
-        // === Write back to the internships CSV ===
+        // Write back to the internships CSV
         try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV))) {
             for (String[] row : rows) {
                 pw.println(String.join(",", row));

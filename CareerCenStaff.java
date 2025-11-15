@@ -218,14 +218,14 @@ public class CareerCenStaff extends User{
             
             if (header == null) return;
             
-            // find column indices
-            int studentIdCol = -1, titleCol = -1, statusCol = -1, withdrawCol = -1;
+            // find column index for withdrawal decision
+            int withdrawCol = -1;
             for (int i = 0; i < header.length; i++) {
                 String h = header[i].trim().toLowerCase();
-                if (h.equals("studentid")) studentIdCol = i;
-                else if (h.equals("internshiptitle")) titleCol = i;
-                else if (h.equals("applicationstatus")) statusCol = i;
-                else if (h.equals("withdrawaldecision")) withdrawCol = i;
+                if (h.equals("withdrawaldecision")) {
+                    withdrawCol = i;
+                    break;
+                }
             }
             
             // read applications with pending withdrawals
