@@ -34,6 +34,7 @@ public class Student extends User {
             System.out.println("3. View Application Status");
             System.out.println("4. Accept Internship Placement");
             System.out.println("5. Request Withdrawal");
+            System.out.println("6. Change Password");
             System.out.println("0. Logout");
             System.out.print("Enter choice: ");
 
@@ -50,6 +51,7 @@ public class Student extends User {
                 case 3 -> viewApplicationStatus();
                 case 4 -> acceptInternship(scanner);
                 case 5 -> withdrawApplication(scanner);
+                case 6 -> changePassword(this.getUserId(), "student", scanner);
                 case 0 -> System.out.println("Logging out...");
                 default -> System.out.println("Invalid choice, please try again.");
             }

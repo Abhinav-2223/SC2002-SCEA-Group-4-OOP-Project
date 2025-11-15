@@ -85,14 +85,33 @@ public abstract class User {
 
         // password validation
         if (currentPw.equals(Helper.csvExtractFields("password",userId,domain))) {
-            // password confirmation
             System.out.println("Enter new password: ");
             String newPw = scanner.nextLine().trim();
-
-            System.out.println("Confirm new password: ");
-            if (scanner.nextLine().trim().equals(newPw))
-                this.password = newPw;
+            
+            if (newPw.isEmpty()) {
+                System.out.println("Password cannot be empty. Password unchanged!");
+                return;
+            }
+            
+            // Update password in memory and CSV
+            this.password = newPw;
+            
+            // Write to CSV based on domain
+            String csvFile = switch (domain) {
+                case "student" -> database.FilePaths.STUDENTS_CSV;
+                case "companyrep" -> database.FilePaths.REPS_CSV;
+                case "staff" -> database.FilePaths.STAFF_CSV;
+                default -> null;
+            };
+            
+            if (csvFile != null) {
+                CompanyRepHelper.updateUserField(userId, "password", newPw, csvFile);
+                System.out.println("Password changed successfully!");
+            } else {
+                System.out.println("Error: Invalid domain. Password unchanged!");
+            }
+        } else {
+            System.out.println("Current password incorrect. Password unchanged!");
         }
-        System.out.println("Password unchanged!");
     }
 }

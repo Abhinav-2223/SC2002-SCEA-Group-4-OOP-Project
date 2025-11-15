@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CompanyRepHelper {
-    public static void updateRepField(String repId, String fieldToUpdate, String newValue) {
+    
+    // Generic method to update any user field in any CSV
+    public static void updateUserField(String userId, String fieldToUpdate, String newValue, String csvFilePath) {
         List<String[]> rows = new ArrayList<>();
         int targetColumn = -1;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.REPS_CSV))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
             String line;
             // read header first
             if ((line = br.readLine()) != null) {
@@ -43,20 +45,24 @@ public class CompanyRepHelper {
         for (int i = 1; i < rows.size(); i++) {   // skip header
             String[] row = rows.get(i);
 
-            if (row[0].equals(repId)) {           // match ID
+            if (row[0].equals(userId)) {           // match ID
                 row[targetColumn] = newValue;
                 break;
             }
         }
 
         // Write back to CSV
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.REPS_CSV))) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(csvFilePath))) {
             for (String[] row : rows) {
                 pw.println(String.join(",", row));
             }
         } catch (IOException e) {
             System.out.println("Error writing file: " + e.getMessage());
         }
+    }
+    
+    public static void updateRepField(String repId, String fieldToUpdate, String newValue) {
+        updateUserField(repId, fieldToUpdate, newValue, FilePaths.REPS_CSV);
     }
 
     public static void updateInternshipField(String internshipTitle, String fieldToUpdate, String newValue) {

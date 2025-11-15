@@ -99,6 +99,7 @@ public class CompanyRep extends User {
             System.out.println("2. Create internships");
             System.out.println("3. Approve/Reject internships");
             System.out.println("4. Toggle internship visibility");
+            System.out.println("5. Change Password");
             System.out.println("0. Logout");
 
             int choice = scanner.nextInt();
@@ -122,6 +123,10 @@ public class CompanyRep extends User {
                 }
                 case 4: {
                     toggleVisibility(scanner);
+                    break;
+                }
+                case 5: {
+                    changePassword(this.getRepId(), "companyrep", scanner);
                     break;
                 }
                 case 0: {

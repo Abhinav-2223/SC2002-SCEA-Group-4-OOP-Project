@@ -33,6 +33,7 @@ public class CareerCenStaff extends User{
             System.out.println("3. Approve Withdrawal Request");
             System.out.println("4. Generate Report");
             System.out.println("5. Filter Internships");
+            System.out.println("6. Change Password");
             System.out.println("0. Logout");
             System.out.print("Enter choice: ");
             
@@ -57,6 +58,9 @@ public class CareerCenStaff extends User{
                     break;
                 case "5":
                     filterInternshipsMenu(scanner);
+                    break;
+                case "6":
+                    changePassword(this.getUserId(), "staff", scanner);
                     break;
                 case "0":
                     System.out.println("Logging out...");

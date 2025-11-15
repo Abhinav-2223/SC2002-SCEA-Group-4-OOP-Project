@@ -14,6 +14,8 @@ public class IPMSystemApp {
             System.out.println("### Internship Management Placement System - IPMS ###");
             System.out.println("1. Login");
             System.out.println("2. Company Representative Registration");
+            System.out.println("0. Exit Application");
+            System.out.println("Enter option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // flush buffer
             switch (choice){
@@ -23,6 +25,11 @@ public class IPMSystemApp {
                 case 2:{
                     CompanyRep.registerCompany(scanner);
                     continue;
+                }
+                case 0:{
+                    System.out.println("Exiting application. Goodbye!");
+                    scanner.close();
+                    System.exit(0);
                 }
                 default:{
                     System.out.println("Invalid Option");
