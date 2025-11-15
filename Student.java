@@ -101,7 +101,7 @@ public class Student extends User {
     private void applyInternship(Scanner scanner) {
         System.out.println("\n--- Apply for Internship ---");
         
-        // QoL: Show available internships first
+        // show available internships before prompting
         viewInternshipList();
         
         System.out.println("\nEnter the title of the internship you want to apply for:");
@@ -133,14 +133,13 @@ public class Student extends User {
             System.out.println("Internship not found or not available.");
             return;
         }
-        
         acceptInternshipPlacement(targetInternship);
     }
 
     private void withdrawApplication(Scanner scanner) {
         System.out.println("\n--- Request Withdrawal ---");
         
-        // QoL: Show current applications that can be withdrawn
+        // show current withdrawable applications
         List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
         List<StudentApplication> withdrawableApps = new ArrayList<>();
         
@@ -201,9 +200,9 @@ public class Student extends User {
                 internship.getPreferredYear() == this.studyYear &&
                 internship.canApply()) {
 
-                // TC6 Fix: Y1-Y2 students should only see BASIC level internships
+                // filter by internship level based on student year
                 if (this.studyYear <= 2 && internship.getInternshipLevel() != enums.InternshipLevel.BASIC) {
-                    continue; // Skip non-BASIC internships for Y1-Y2 students
+                    continue;
                 }
 
                 // Display internship details
@@ -351,13 +350,12 @@ public class Student extends User {
             return;
         }
         
-        // TEST CASE 10: Accept the internship and withdraw all other applications
+        // accept internship and auto-withdraw all other pending applications
         acceptedapplications = internship.getTitle();
         
-        // Update the accepted application status to ACCEPTED in CSV
         StudentApplication.updateApplicationStatus(this.getUserId(), internship.getTitle(), "ACCEPTED");
         
-        // Slot management: Decrement slot count for accepted internship
+        // decrement available slot count for the accepted internship
         if (SlotManager.updateSlotCount(internship.getTitle(), -1)) {
             System.out.println("Slot reserved for internship: " + internship.getTitle());
         }

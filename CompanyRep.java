@@ -174,7 +174,7 @@ public class CompanyRep extends User {
     private void createInternships(Scanner scanner){
         switch (regStatus){
             case RepRegistrationStatus.APPROVED -> {
-                // TC10 Fix: Check max 5 opportunities limit
+                // enforce maximum 5 internship opportunities per company rep
                 if (internshipsCreated >= 5) {
                     System.out.println("Maximum limit of 5 internship opportunities reached. Cannot create more.");
                     return;
@@ -184,7 +184,7 @@ public class CompanyRep extends User {
                 System.out.print("Enter internship title: ");
                 String title = scanner.nextLine().trim();
                 
-                // TC10 Fix: Validate title not empty
+                // validate required fields are not empty
                 if (title.isEmpty()) {
                     System.out.println("Error: Title cannot be empty. Internship creation cancelled.");
                     return;
@@ -202,7 +202,7 @@ public class CompanyRep extends User {
                 String internshipLevelInput = scanner.nextLine().trim();
                 InternshipLevel internshipLevel;
                 
-                // TC10 Fix: Validate enum input with try-catch
+                // validate internship level enum value
                 try {
                     internshipLevel = InternshipLevel.valueOf(internshipLevelInput.toUpperCase());
                 } catch (IllegalArgumentException e) {
@@ -247,10 +247,10 @@ public class CompanyRep extends User {
                 System.out.println("Enter internship slots (up to 10 maximum)");
                 int slots;
                 
-                // TC10 Fix: Validate slots with try-catch and range check
+                // validate slot count is between 1 and 10
                 try {
                     slots = scanner.nextInt();
-                    scanner.nextLine(); // clear buffer after nextInt()
+                    scanner.nextLine();
                     
                     if (slots < 1 || slots > 10) {
                         System.out.println("Error: Slots must be between 1 and 10. Internship creation cancelled.");

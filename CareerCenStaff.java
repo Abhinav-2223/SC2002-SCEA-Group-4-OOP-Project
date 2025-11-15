@@ -42,21 +42,21 @@ public class CareerCenStaff extends User{
             
             switch (choice) {
                 case "1":
-                    // QoL: Show list of pending reps
+                    // show pending company reps before prompting
                     showPendingCompanyReps();
                     System.out.print("Enter Company Rep ID to authorize: ");
                     String repId = scanner.nextLine().trim();
                     authorizeCompanyRep(repId);
                     break;
                 case "2":
-                    // QoL: Show list of pending internships
+                    // show pending internships before prompting
                     showPendingInternships();
                     System.out.print("Enter Internship Title to approve: ");
                     String internTitle = scanner.nextLine().trim();
                     approveInternship(internTitle);
                     break;
                 case "3":
-                    // TC15 Fix: Add rejection functionality
+                    // show pending internships before prompting for rejection
                     showPendingInternships();
                     System.out.print("Enter Internship Title to reject: ");
                     String rejectTitle = scanner.nextLine().trim();
@@ -219,7 +219,7 @@ public class CareerCenStaff extends User{
         }
     }
 
-    // TC15 Fix: reject internship by title
+    // reject internship opportunity and update status to rejected
     private void rejectInternship(String internshipTitle) {
         List<String> lines = new ArrayList<>();
         boolean found = false;
@@ -402,7 +402,7 @@ public class CareerCenStaff extends User{
                     lines.add(String.join(",", row));
                     System.out.println("Withdrawal decision updated to " + decision + ".");
                     
-                    // Slot management: Return slot if withdrawal approved
+                    // return slot to internship if withdrawal is approved
                     if (decision == WithdrawalDecision.APPROVED) {
                         if (SlotManager.updateSlotCount(internshipTitle, +1)) {
                             System.out.println("Slot returned for internship: " + internshipTitle);
@@ -624,7 +624,7 @@ public class CareerCenStaff extends User{
         return 0;
     }
     
-    // QoL: Show list of PENDING company reps
+    // display all company representatives with pending registration status
     private void showPendingCompanyReps() {
         System.out.println("\n--- Pending Company Representatives ---");
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.REPS_CSV))) {
@@ -670,7 +670,7 @@ public class CareerCenStaff extends User{
         }
     }
     
-    // QoL: Show list of PENDING internships
+    // display all internship opportunities with pending approval status
     private void showPendingInternships() {
         System.out.println("\n--- Pending Internship Opportunities ---");
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
