@@ -47,9 +47,16 @@ public class StudentMenu {
         System.out.print("Enter internship title: ");
         String title = scanner.nextLine();
 
-        Internships internships = new Internships();
-        internships.setTitle(title);
-        student.applyForInternship(internships);
+        Internships targetInternship = CSVUtils.findInternshipByTitle(
+            Internships.getAllVisibleInternships(), title
+        );
+        
+        if (targetInternship == null) {
+            System.out.println("Internship not found or not available.");
+            return;
+        }
+        
+        student.applyForInternship(targetInternship);
     }
 
     private void acceptInternship() {
@@ -57,9 +64,16 @@ public class StudentMenu {
         System.out.print("Enter internship title to accept: ");
         String title = scanner.nextLine();
 
-        Internships internships = new Internships();
-        internships.setTitle(title);
-        student.acceptInternshipPlacement(internships);
+        Internships targetInternship = CSVUtils.findInternshipByTitle(
+            Internships.getAllVisibleInternships(), title
+        );
+        
+        if (targetInternship == null) {
+            System.out.println("Internship not found or not available.");
+            return;
+        }
+        
+        student.acceptInternshipPlacement(targetInternship);
     }
 
     private void withdrawApplication() {
@@ -67,8 +81,15 @@ public class StudentMenu {
         System.out.print("Enter internship title to withdraw from: ");
         String title = scanner.nextLine();
 
-        Internships internships = new Internships();
-        internships.setTitle(title);
-        student.requestWithdrawal(internships);
+        Internships targetInternship = CSVUtils.findInternshipByTitle(
+            Internships.getAllVisibleInternships(), title
+        );
+        
+        if (targetInternship == null) {
+            System.out.println("Internship not found or not available.");
+            return;
+        }
+        
+        student.requestWithdrawal(targetInternship);
     }
 }

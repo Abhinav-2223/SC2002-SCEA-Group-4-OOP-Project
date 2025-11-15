@@ -1,13 +1,13 @@
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Student extends User {
     private final String major;
     private final int studyYear;
     private final List<StudentApplication> applications; // store student's applications
     private String acceptedapplications; // store accepted internship title
-    private static boolean internshipsInitialized = false; // track if test internships are loaded
 
     // constructor
     public Student(String studentId, String name, String password, String major, int studyYear) {
@@ -16,13 +16,6 @@ public class Student extends User {
         this.studyYear = studyYear;
         this.applications = new ArrayList<>();
         this.acceptedapplications = "NONE";
-        
-        // Initialize test internships for student class testing --> remove later
-        if (!internshipsInitialized) {
-            System.out.println("Initializing test internships...");
-            Internships.initializeTestInternships();
-            internshipsInitialized = true;
-        }
     }
 
     // getters and setters
@@ -33,8 +26,13 @@ public class Student extends User {
     // implemented inherited abstract methods
     @Override
     public boolean logout(){
-        // TODO: change this to properly match studentUI()
         return false;
+    }
+
+    @Override
+    public void runUserUi(Scanner scanner) {
+        StudentMenu menu = new StudentMenu(this);
+        menu.startDashboard();
     }
 
     // class methods
@@ -185,5 +183,24 @@ public class Student extends User {
         }
 
         System.out.println("No application found for this internship.");
+    }
+
+    @Override
+    public List<Internships> filteringInternships(String filterType, String filterValue) {
+        List<Internships> visibleInternships = Internships.getAllVisibleInternships();
+        List<Internships> filtered = new ArrayList<>();
+        
+        for (Internships internship : visibleInternships) {
+            boolean matches = switch (filterType.toLowerCase()) {
+                case "status" -> internship.getOpportunityStatus().name().equalsIgnoreCase(filterValue);
+                case "major" -> internship.getPreferredMajor().equalsIgnoreCase(filterValue);
+                case "level" -> internship.getInternshipLevel().name().equalsIgnoreCase(filterValue);
+                case "company" -> internship.getCompanyName().equalsIgnoreCase(filterValue);
+                default -> true;
+            };
+            if (matches) filtered.add(internship);
+        }
+        
+        return filtered;
     }
 }

@@ -18,7 +18,9 @@ public class CompanyRep extends User {
 
     // instance variables
     private final String companyName;
+    @SuppressWarnings("unused")
     private final String department;
+    @SuppressWarnings("unused")
     private final String position;
     private int internshipsCreated;
 
@@ -47,7 +49,7 @@ public class CompanyRep extends User {
     // class methods
     // User inputs fields to create an account with a default password (can change upon login once approved)
     public static void registerCompany(Scanner scanner) {
-        // TODO: create an entry in company_reps_list.csv, let staff approve it (change enum val in csv)
+        // create an entry in company_reps_list.csv, let staff approve it (change enum val in csv)
         System.out.println("# - Company Representative Registration");
         System.out.print("Enter ID (Company email): ");
         String id = scanner.nextLine().trim();
@@ -132,6 +134,35 @@ public class CompanyRep extends User {
                 }
             }
         }
+    }
+
+    // get all internships created by this company
+    public List<Internships> getInternships() {
+        return CSVUtils.readInternshipsFromCSV(
+            internship -> internship.getCompanyName().equalsIgnoreCase(this.companyName)
+        );
+    }
+    
+    // helper method to parse date string (YYYY-MM-DD) to integer (YYYYMMDD)
+
+
+    @Override
+    public List<Internships> filteringInternships(String filterType, String filterValue) {
+        List<Internships> allInternships = CSVUtils.readInternshipsFromCSV(null);
+        List<Internships> filtered = new ArrayList<>();
+        
+        for (Internships internship : allInternships) {
+            boolean matches = switch (filterType.toLowerCase()) {
+                case "status" -> internship.getOpportunityStatus().name().equalsIgnoreCase(filterValue);
+                case "major" -> internship.getPreferredMajor().equalsIgnoreCase(filterValue);
+                case "level" -> internship.getInternshipLevel().name().equalsIgnoreCase(filterValue);
+                case "company" -> internship.getCompanyName().equalsIgnoreCase(filterValue);
+                default -> true;
+            };
+            if (matches) filtered.add(internship);
+        }
+        
+        return filtered;
     }
 
     @Override

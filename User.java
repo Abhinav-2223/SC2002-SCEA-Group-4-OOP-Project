@@ -4,6 +4,9 @@ import enums.RepRegistrationStatus;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public abstract class User {
@@ -11,12 +14,14 @@ public abstract class User {
     protected String password;
     protected final String name;
     protected final String domain; // valid domains: "student", "companyrep", "staff"
+    protected Map<String, String> filterPreferences; // in-memory filter preferences for this session
 
     protected User(String userId, String name, String password, String domain) {
         this.userId = userId;
         this.name = name;
         this.password = password;
         this.domain = domain;
+        this.filterPreferences = new HashMap<>();
     }
 
     // getters & setters
@@ -25,6 +30,11 @@ public abstract class User {
     public String getDomain() { return domain; }
 
     public void setPassword(String password) { this.password = password; }
+    
+    public Map<String, String> getFilterPreferences() { return filterPreferences; }
+    public void setFilterPreference(String filterType, String filterValue) {
+        filterPreferences.put(filterType, filterValue);
+    }
 
     // class methods
     public static boolean userLogin(String id, String password, String domain) {
@@ -68,10 +78,10 @@ public abstract class User {
 
     public abstract boolean logout();
     public abstract void runUserUi(Scanner scanner);
+    public abstract List<Internships> filteringInternships(String filterType, String filterValue);
 
     // TODO: test this method; see if works
-    public void changePassword(String userId, String domain) {
-        Scanner scanner = new Scanner(System.in);
+    public void changePassword(String userId, String domain, Scanner scanner) {
         System.out.println("Enter current password: ");
         String currentPw = scanner.nextLine();
 

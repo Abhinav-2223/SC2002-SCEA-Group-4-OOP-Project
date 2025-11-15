@@ -53,12 +53,10 @@ public class IPMSystemApp {
             isLoggedIn = true;
 
             // branches to individual subclass (routes program interface to implemented stuff within each subclass)
-            // TODO: implement interface for each subclass (distribute workload)!
             switch (user.getDomain()) {
                 case "student":{
-                    Student student = (Student) user; // cast to Student
-                    StudentMenu studentMenu = new StudentMenu(student);
-                    studentMenu.startDashboard();
+                    user.runUserUi(scanner);
+                    isLoggedIn = false;
                     break;
                 }
                 case "companyrep":{
@@ -67,7 +65,8 @@ public class IPMSystemApp {
                     break;
                 }
                 case "staff":{
-                    System.out.println("Staff");
+                    user.runUserUi(scanner);
+                    isLoggedIn = false;
                     break;
                 }
                 default:{
