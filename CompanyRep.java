@@ -110,12 +110,12 @@ public class CompanyRep extends User {
                     break;
                 }
                 case 2: {
-                    if (Integer.parseInt(Objects.requireNonNull(Helper.csvExtractFields("InternshipsCreated", getRepId(), "companyrep"))) < 5)
+                    if (Integer.parseInt(Objects.requireNonNull(Helper.csvExtractFields("InternshipsCreated", getRepId(), "companyrep"))) < 5) {
                         createInternships(scanner);
-                    else {
+                    } else {
                         System.out.println("Internship limit reached! Cannot create any more internships");
-                        break;
                     }
+                    break;
                 }
                 case 3: {
                     approveRejectInternship(scanner);
@@ -172,7 +172,6 @@ public class CompanyRep extends User {
 
     // max 5 internships/company, max 10 slots each
     public void createInternships(Scanner scanner){
-
         switch (regStatus){
             case RepRegistrationStatus.APPROVED -> {
                 System.out.println("# - Create Internship Opportunity");
@@ -201,13 +200,28 @@ public class CompanyRep extends User {
 
                 boolean visibility = true;
 
-                // append the new entry to reps csv
-                try (FileWriter fw = new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV, true);
-                     BufferedWriter bw = new BufferedWriter(fw);
-                     PrintWriter out = new PrintWriter(bw)) {
+                // Read existing file, remove blank lines, then append
+                List<String> existingLines = new ArrayList<>();
+                try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (!line.trim().isEmpty()) { // only keep non-empty lines
+                            existingLines.add(line);
+                        }
+                    }
+                } catch (IOException e) {
+                    System.out.println("Error reading file: " + e.getMessage());
+                    return;
+                }
 
-                    // Follow the exact CSV header order:
-                    // appends based on sequence (as in csv file): ID,Password,Name,CompanyName,Department,Position,regStatus
+                // Write back all lines plus the new internship
+                try (PrintWriter out = new PrintWriter(new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV))) {
+                    // Write existing lines
+                    for (String line : existingLines) {
+                        out.println(line);
+                    }
+                    
+                    // Append new internship
                     out.println(String.join(",",
                             title,
                             desc,
@@ -372,7 +386,12 @@ public class CompanyRep extends User {
                 return;
             }
             while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // skip empty lines
                 String[] row = line.split(",", -1);
+                
+                // Check if row has enough columns
+                if (row.length <= repCol || row.length <= titleCol) continue;
+                
                 if (row[repCol].equalsIgnoreCase(getCompanyName())) {
                     myInternships.add(row[titleCol]);
                 }
