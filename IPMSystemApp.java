@@ -27,8 +27,7 @@ public class IPMSystemApp {
                     continue;
                 }
                 case 0:{
-                    System.out.println("Exiting application. Goodbye!");
-                    scanner.close();
+                    System.out.println("Exiting application...");
                     System.exit(0);
                 }
                 default:{
@@ -46,7 +45,11 @@ public class IPMSystemApp {
 
             // auth + validation
             if (!User.userLogin(username, password, domain)) {
-                System.out.println("Login failed! Username or password is incorrect.\n");
+                if (domain.equals("companyrep")) {
+                    System.out.println("Login failed! Username or password is incorrect, or account yet to be approved!\n");
+                } else {
+                    System.out.println("Login failed! Username or password is incorrect.\n");
+                }
                 continue; // ignore rest of iteration and reprompts
             }
 
