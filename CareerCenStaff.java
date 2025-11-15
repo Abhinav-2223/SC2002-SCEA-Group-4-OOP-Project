@@ -30,10 +30,11 @@ public class CareerCenStaff extends User{
             System.out.println("\n=== Career Centre Staff Dashboard ===");
             System.out.println("1. Authorize Company Representative");
             System.out.println("2. Approve Internship Opportunity");
-            System.out.println("3. Approve Withdrawal Request");
-            System.out.println("4. Generate Report");
-            System.out.println("5. Filter Internships");
-            System.out.println("6. Change Password");
+            System.out.println("3. Reject Internship Opportunity");
+            System.out.println("4. Approve Withdrawal Request");
+            System.out.println("5. Generate Report");
+            System.out.println("6. Filter Internships");
+            System.out.println("7. Change Password");
             System.out.println("0. Logout");
             System.out.print("Enter choice: ");
             
@@ -41,25 +42,36 @@ public class CareerCenStaff extends User{
             
             switch (choice) {
                 case "1":
+                    // QoL: Show list of pending reps
+                    showPendingCompanyReps();
                     System.out.print("Enter Company Rep ID to authorize: ");
                     String repId = scanner.nextLine().trim();
                     authorizeCompanyRep(repId);
                     break;
                 case "2":
+                    // QoL: Show list of pending internships
+                    showPendingInternships();
                     System.out.print("Enter Internship Title to approve: ");
                     String internTitle = scanner.nextLine().trim();
                     approveInternship(internTitle);
                     break;
                 case "3":
-                    approveWithdrawalRequestMenu(scanner);
+                    // TC15 Fix: Add rejection functionality
+                    showPendingInternships();
+                    System.out.print("Enter Internship Title to reject: ");
+                    String rejectTitle = scanner.nextLine().trim();
+                    rejectInternship(rejectTitle);
                     break;
                 case "4":
-                    generateReport();
+                    approveWithdrawalRequestMenu(scanner);
                     break;
                 case "5":
-                    filterInternshipsMenu(scanner);
+                    generateReport();
                     break;
                 case "6":
+                    filterInternshipsMenu(scanner);
+                    break;
+                case "7":
                     changePassword(this.getUserId(), "staff", scanner);
                     break;
                 case "0":
@@ -73,7 +85,7 @@ public class CareerCenStaff extends User{
     }
 
     // authorize company rep by ID
-    public void authorizeCompanyRep(String repId) {
+    private void authorizeCompanyRep(String repId) {
         List<String> lines = new ArrayList<>();
         boolean found = false;
         
@@ -140,7 +152,7 @@ public class CareerCenStaff extends User{
     }
 
     // approve internship by title
-    public void approveInternship(String internshipTitle) {
+    private void approveInternship(String internshipTitle) {
         List<String> lines = new ArrayList<>();
         boolean found = false;
         
@@ -182,6 +194,74 @@ public class CareerCenStaff extends User{
                     }
                     lines.add(String.join(",", row));
                     System.out.println("Internship '" + internshipTitle + "' has been approved.");
+                } else {
+                    lines.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading internships CSV: " + e.getMessage());
+            return;
+        }
+        
+        if (!found) {
+            System.out.println("Internship with title '" + internshipTitle + "' not found.");
+            return;
+        }
+        
+        // write back to CSV
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV))) {
+            for (String line : lines) {
+                bw.write(line);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to internships CSV: " + e.getMessage());
+        }
+    }
+
+    // TC15 Fix: reject internship by title
+    private void rejectInternship(String internshipTitle) {
+        List<String> lines = new ArrayList<>();
+        boolean found = false;
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
+            String line;
+            String[] header = null;
+            
+            if ((line = br.readLine()) != null) {
+                header = line.split(",", -1);
+                lines.add(line); // keep header
+            }
+            
+            if (header == null) {
+                System.out.println("Error: Invalid CSV format");
+                return;
+            }
+            
+            // find Title and OpportunityStatus columns
+            int titleCol = -1, statusCol = -1;
+            for (int i = 0; i < header.length; i++) {
+                String h = header[i].trim();
+                if (h.equalsIgnoreCase("Title")) titleCol = i;
+                else if (h.equalsIgnoreCase("OpportunityStatus")) statusCol = i;
+            }
+            
+            // read and update rows
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                
+                String[] row = line.split(",", -1);
+                
+                String title = titleCol >= 0 && row.length > titleCol ? row[titleCol].trim() : "";
+                
+                if (title.equalsIgnoreCase(internshipTitle)) {
+                    found = true;
+                    // update opportunity status to REJECTED
+                    if (statusCol >= 0 && row.length > statusCol) {
+                        row[statusCol] = OpportunityStatus.REJECTED.name();
+                    }
+                    lines.add(String.join(",", row));
+                    System.out.println("Internship '" + internshipTitle + "' has been rejected.");
                 } else {
                     lines.add(line);
                 }
@@ -321,6 +401,13 @@ public class CareerCenStaff extends User{
                     }
                     lines.add(String.join(",", row));
                     System.out.println("Withdrawal decision updated to " + decision + ".");
+                    
+                    // Slot management: Return slot if withdrawal approved
+                    if (decision == WithdrawalDecision.APPROVED) {
+                        if (SlotManager.updateSlotCount(internshipTitle, +1)) {
+                            System.out.println("Slot returned for internship: " + internshipTitle);
+                        }
+                    }
                 } else {
                     lines.add(line);
                 }
@@ -342,7 +429,7 @@ public class CareerCenStaff extends User{
     }
 
     // generate report of all applications
-    public void generateReport() {
+    private void generateReport() {
         System.out.println("\n=== Applications Report ===");
         
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
@@ -535,5 +622,95 @@ public class CareerCenStaff extends User{
             }
         } catch (Exception e) { /* ignore */ }
         return 0;
+    }
+    
+    // QoL: Show list of PENDING company reps
+    private void showPendingCompanyReps() {
+        System.out.println("\n--- Pending Company Representatives ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.REPS_CSV))) {
+            String line;
+            String[] header = null;
+            int idCol = -1, nameCol = -1, companyCol = -1, statusCol = -1;
+            
+            if ((line = br.readLine()) != null) {
+                header = line.split(",", -1);
+                for (int i = 0; i < header.length; i++) {
+                    if (header[i].trim().equalsIgnoreCase("ID")) idCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("Name")) nameCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("CompanyName")) companyCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("RegStatus")) statusCol = i;
+                }
+            }
+            
+            if (idCol == -1 || statusCol == -1) {
+                System.out.println("CSV format error.");
+                return;
+            }
+            
+            boolean found = false;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] row = line.split(",", -1);
+                
+                if (row.length > statusCol && row[statusCol].trim().equalsIgnoreCase("PENDING")) {
+                    found = true;
+                    String id = row.length > idCol ? row[idCol] : "N/A";
+                    String name = row.length > nameCol ? row[nameCol] : "N/A";
+                    String company = row.length > companyCol ? row[companyCol] : "N/A";
+                    System.out.printf("ID: %s | Name: %s | Company: %s%n", id, name, company);
+                }
+            }
+            
+            if (!found) {
+                System.out.println("No pending company representatives.");
+            }
+            System.out.println("-----------------------------------");
+        } catch (IOException e) {
+            System.out.println("Error reading company reps: " + e.getMessage());
+        }
+    }
+    
+    // QoL: Show list of PENDING internships
+    private void showPendingInternships() {
+        System.out.println("\n--- Pending Internship Opportunities ---");
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
+            String line;
+            String[] header = null;
+            int titleCol = -1, companyCol = -1, statusCol = -1;
+            
+            if ((line = br.readLine()) != null) {
+                header = line.split(",", -1);
+                for (int i = 0; i < header.length; i++) {
+                    if (header[i].trim().equalsIgnoreCase("Title")) titleCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("CompanyName")) companyCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("OpportunityStatus")) statusCol = i;
+                }
+            }
+            
+            if (titleCol == -1 || statusCol == -1) {
+                System.out.println("CSV format error.");
+                return;
+            }
+            
+            boolean found = false;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] row = line.split(",", -1);
+                
+                if (row.length > statusCol && row[statusCol].trim().equalsIgnoreCase("PENDING")) {
+                    found = true;
+                    String title = row.length > titleCol ? row[titleCol] : "N/A";
+                    String company = row.length > companyCol ? row[companyCol] : "N/A";
+                    System.out.printf("Title: %s | Company: %s%n", title, company);
+                }
+            }
+            
+            if (!found) {
+                System.out.println("No pending internship opportunities.");
+            }
+            System.out.println("----------------------------------------");
+        } catch (IOException e) {
+            System.out.println("Error reading internships: " + e.getMessage());
+        }
     }
 }

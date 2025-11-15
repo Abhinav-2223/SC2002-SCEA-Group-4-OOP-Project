@@ -1,7 +1,12 @@
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import database.FilePaths;
 
 public class Student extends User {
     private final String major;
@@ -25,12 +30,21 @@ public class Student extends User {
     // implemented inherited abstract methods
     @Override
     public void runUserUi(Scanner scanner) {
+        // Initialize accepted applications status from CSV
+        initializeAcceptedApplications();
+        
         int choice = -1;
         do {
             System.out.println("\n=== Student Dashboard ===");
             System.out.println("Welcome, " + this.getName() + " (" + this.getUserId() + ")");
             System.out.println("1. View Internship List");
-            System.out.println("2. Apply for Internship");
+            
+            // Only show Apply option if student hasn't accepted an internship
+            if (acceptedapplications.equals("NONE")) {
+                System.out.println("2. Apply for Internship");
+            } else {
+                System.out.println("2. [LOCKED] Apply for Internship (You have accepted: " + acceptedapplications + ")");
+            }
             System.out.println("3. View Application Status");
             System.out.println("4. Accept Internship Placement");
             System.out.println("5. Request Withdrawal");
@@ -47,7 +61,14 @@ public class Student extends User {
 
             switch (choice) {
                 case 1 -> viewInternshipList();
-                case 2 -> applyInternship(scanner);
+                case 2 -> {
+                    // Block access if student has accepted an internship
+                    if (!acceptedapplications.equals("NONE")) {
+                        System.out.println("Cannot apply for new internships. You have already accepted an internship placement: " + acceptedapplications);
+                    } else {
+                        applyInternship(scanner);
+                    }
+                }
                 case 3 -> viewApplicationStatus();
                 case 4 -> acceptInternship(scanner);
                 case 5 -> withdrawApplication(scanner);
@@ -57,17 +78,35 @@ public class Student extends User {
             }
         } while (choice != 0);
     }
+    
+    // Initialize accepted applications from CSV (check if student has accepted any internship)
+    private void initializeAcceptedApplications() {
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        for (StudentApplication app : allApplications) {
+            if (app.getAppStatus() == enums.ApplicationStatus.ACCEPTED) {
+                acceptedapplications = app.getInternship().getTitle();
+                break;
+            }
+        }
+        // Also load all current applications into memory for reference
+        applications.clear();
+        applications.addAll(allApplications);
+    }
 
     // class methods
     public static void studentUI(){
         System.out.println("I am Student");
     }
 
-    // helper methods for user input
     private void applyInternship(Scanner scanner) {
         System.out.println("\n--- Apply for Internship ---");
-        System.out.print("Enter internship title: ");
-        String title = scanner.nextLine();
+        
+        // QoL: Show available internships first
+        viewInternshipList();
+        
+        System.out.println("\nEnter the title of the internship you want to apply for:");
+        System.out.print("Internship title: ");
+        String title = scanner.nextLine().trim();
 
         Internships targetInternship = CSVUtils.findInternshipByTitle(
             Internships.getAllVisibleInternships(), title
@@ -100,15 +139,41 @@ public class Student extends User {
 
     private void withdrawApplication(Scanner scanner) {
         System.out.println("\n--- Request Withdrawal ---");
-        System.out.print("Enter internship title to withdraw from: ");
-        String title = scanner.nextLine();
+        
+        // QoL: Show current applications that can be withdrawn
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        List<StudentApplication> withdrawableApps = new ArrayList<>();
+        
+        System.out.println("\nYour current applications:");
+        System.out.println("-------------------------");
+        
+        for (StudentApplication app : allApplications) {
+            // Only show applications that can be withdrawn (PENDING or SUCCESSFUL, not WITHDRAWN or ACCEPTED)
+            if (app.getAppStatus() == enums.ApplicationStatus.PENDING || 
+                app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
+                withdrawableApps.add(app);
+                System.out.println("Title: " + app.getInternship().getTitle());
+                System.out.println("Company: " + app.getInternship().getCompanyName());
+                System.out.println("Status: " + app.getAppStatus());
+                System.out.println("-------------------------");
+            }
+        }
+        
+        if (withdrawableApps.isEmpty()) {
+            System.out.println("No applications available to withdraw.");
+            return;
+        }
+        
+        System.out.println("\nEnter the title of the internship you want to withdraw from:");
+        System.out.print("Internship title: ");
+        String title = scanner.nextLine().trim();
 
         Internships targetInternship = CSVUtils.findInternshipByTitle(
-            Internships.getAllVisibleInternships(), title
+            CSVUtils.readInternshipsFromCSV(null), title
         );
         
         if (targetInternship == null) {
-            System.out.println("Internship not found or not available.");
+            System.out.println("Internship not found.");
             return;
         }
         
@@ -117,7 +182,7 @@ public class Student extends User {
 
     // instance methods
     // Student can view the list of available internships --> need to figure out how to store internships first
-    public void viewInternshipList() {
+    private void viewInternshipList() {
 
         List<Internships> visibleInternships = Internships.getAllVisibleInternships();
         
@@ -136,6 +201,11 @@ public class Student extends User {
                 internship.getPreferredYear() == this.studyYear &&
                 internship.canApply()) {
 
+                // TC6 Fix: Y1-Y2 students should only see BASIC level internships
+                if (this.studyYear <= 2 && internship.getInternshipLevel() != enums.InternshipLevel.BASIC) {
+                    continue; // Skip non-BASIC internships for Y1-Y2 students
+                }
+
                 // Display internship details
                 System.out.println("Title: " + internship.getTitle());
                 System.out.println("Company: " + internship.getCompanyName());
@@ -143,6 +213,10 @@ public class Student extends User {
                 System.out.println("Level: " + internship.getInternshipLevel());
                 System.out.println("Slots: " + internship.getSlots());
                 System.out.println("Closing Date: " + internship.getClosingDate());
+                
+                // Display managing reps
+                displayManagingReps(internship.getTitle());
+                
                 System.out.println("-------------------------");
                 foundMatchingInternship = true;
             }
@@ -155,20 +229,52 @@ public class Student extends User {
 
 
     // Student can apply for an internship --> sent to StudentApplication class --> send to CarreerCenStaff for approval
-    public void applyForInternship(Internships internship) {
+    private void applyForInternship(Internships internship) {
 
-        // check if student has reached max application limit of 3
-        if (applications.size() >= 3) {
-            System.out.println("Maximum application limit of 3 reached. Cannot apply for more internships.");
+        if (!acceptedapplications.equals("NONE")) {
+            System.out.println("Cannot apply for new internships. You have already accepted an internship placement: " + acceptedapplications);
             return;
         }
 
-        // prevent multiple applications for the same internship
-        for (StudentApplication app : applications) {
-            if (app.getInternship().equals(internship)) {
-                System.out.println("You have already applied for this internship: " + internship.getTitle());
-                return;
+        if (!internship.isVisible()) {
+            System.out.println("Cannot apply for this internship. Visibility is currently OFF.");
+            return;
+        }
+
+        if (!internship.getPreferredMajor().equalsIgnoreCase(this.major)) {
+            System.out.println("Cannot apply for this internship. Your major (" + this.major + ") does not match the required major (" + internship.getPreferredMajor() + ").");
+            return;
+        }
+
+        if (internship.getPreferredYear() != this.studyYear) {
+            System.out.println("Cannot apply for this internship. Your year (" + this.studyYear + ") does not match the required year (" + internship.getPreferredYear() + ").");
+            return;
+        }
+
+        // Load current applications from CSV to check for duplicates and count
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        int activeApplicationCount = 0;
+        
+        // Check for duplicates and count active applications (not WITHDRAWN)
+        for (StudentApplication app : allApplications) {
+            // Check if already applied to this internship
+            if (app.getInternship().getTitle().equals(internship.getTitle())) {
+                if (app.getAppStatus() != enums.ApplicationStatus.WITHDRAWN) {
+                    System.out.println("You have already applied for this internship: " + internship.getTitle());
+                    return;
+                }
             }
+            // Count active applications
+            if (app.getAppStatus() != enums.ApplicationStatus.WITHDRAWN && 
+                app.getAppStatus() != enums.ApplicationStatus.ACCEPTED) {
+                activeApplicationCount++;
+            }
+        }
+        
+        // check if student has reached max application limit of 3
+        if (activeApplicationCount >= 3) {
+            System.out.println("Maximum application limit of 3 reached. Cannot apply for more internships.");
+            return;
         }
 
         // check if internship can be applied to
@@ -197,61 +303,101 @@ public class Student extends User {
     }
 
     // Student can view their application status
-    public void viewApplicationStatus() {
-        if (applications.isEmpty()) {
+    private void viewApplicationStatus() {
+        System.out.println("\n--- Your Application Status ---");
+        
+        // Load applications from CSV
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        
+        if (allApplications.isEmpty()) {
             System.out.println("No applications found.");
             return;
         }
-        for (StudentApplication app : applications) {
+        
+        for (StudentApplication app : allApplications) {
             app.displayApplicationDetails();
             System.out.println("-------------------------");
         }
     }
 
     // Student can accept an internship placement offer
-    public void acceptInternshipPlacement(Internships internship) {
+    private void acceptInternshipPlacement(Internships internship) {
         // Student can only accept 1 internship offer
         if (!acceptedapplications.equals("NONE")) {
             System.out.println("You have already accepted an internship placement: " + acceptedapplications);
             return;
         }
 
+        // Load applications from CSV to get current status
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        StudentApplication targetApp = null;
+        
         // Find the application for the given internship
-        for (StudentApplication app : applications) {
-            if (app.getInternship().equals(internship)) {
-
-                // Check if the application status is SUCCESSFUL
-                if (app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
-                    acceptedapplications = internship.getTitle(); // update accepted applications
-                    System.out.println("Internship placement accepted for: " + internship.getTitle());
-                    applications.remove(app); // remove other applications
-                    return;
-                } else {
-                    System.out.println("No offer available for this internship.");
-                    return;
-                }
-
+        for (StudentApplication app : allApplications) {
+            if (app.getInternship().getTitle().equals(internship.getTitle())) {
+                targetApp = app;
+                break;
             }
         }
+        
+        if (targetApp == null) {
+            System.out.println("No application found for this internship.");
+            return;
+        }
 
-        // If no application found for the given internship
-        System.out.println("No application found for this internship.");
+        // Check if the application status is SUCCESSFUL
+        if (targetApp.getAppStatus() != enums.ApplicationStatus.SUCCESSFUL) {
+            System.out.println("No offer available for this internship. Application status: " + targetApp.getAppStatus());
+            return;
+        }
+        
+        // TEST CASE 10: Accept the internship and withdraw all other applications
+        acceptedapplications = internship.getTitle();
+        
+        // Update the accepted application status to ACCEPTED in CSV
+        StudentApplication.updateApplicationStatus(this.getUserId(), internship.getTitle(), "ACCEPTED");
+        
+        // Slot management: Decrement slot count for accepted internship
+        if (SlotManager.updateSlotCount(internship.getTitle(), -1)) {
+            System.out.println("Slot reserved for internship: " + internship.getTitle());
+        }
+        
+        System.out.println("Internship placement accepted for: " + internship.getTitle());
+        
+        // Withdraw all other pending applications
+        for (StudentApplication app : allApplications) {
+            if (!app.getInternship().getTitle().equals(internship.getTitle())) {
+                if (app.getAppStatus() == enums.ApplicationStatus.PENDING || 
+                    app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
+                    StudentApplication.updateApplicationStatus(this.getUserId(), app.getInternship().getTitle(), "WITHDRAWN");
+                    System.out.println("Automatically withdrawn application for: " + app.getInternship().getTitle());
+                }
+            }
+        }
+        
+        System.out.println("All other pending applications have been automatically withdrawn.");
     }
 
 
 
     // Student can withdraw their application
-    public void requestWithdrawal(Internships internship) {
-
-        for (StudentApplication app : applications) {
-            if (app.getInternship().equals(internship)) {
+    private void requestWithdrawal(Internships internship) {
+        // Load applications from CSV to get current status
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        
+        for (StudentApplication app : allApplications) {
+            if (app.getInternship().getTitle().equals(internship.getTitle())) {
 
                 if (app.getAppStatus() == enums.ApplicationStatus.PENDING) {
-                    app.setWithdrawDecision(enums.WithdrawalDecision.PENDING); // need approval from CareerCentStaff ( need to figure out)
-                    System.out.println("Withdrawal request submitted for internship: " + internship.getTitle());
+                    // Update status to WITHDRAWN in CSV
+                    StudentApplication.updateApplicationStatus(this.getUserId(), internship.getTitle(), "WITHDRAWN");
+                    System.out.println("Application withdrawn for internship: " + internship.getTitle());
+                    return;
+                } else if (app.getAppStatus() == enums.ApplicationStatus.WITHDRAWN) {
+                    System.out.println("Application has already been withdrawn.");
                     return;
                 } else {
-                    System.out.println("Cannot withdraw application. It has already been processed.");
+                    System.out.println("Cannot withdraw application. Current status: " + app.getAppStatus());
                     return;
                 }
             }
@@ -277,5 +423,76 @@ public class Student extends User {
         }
         
         return filtered;
+    }
+    
+    // Helper to display managing company reps for an internship
+    private void displayManagingReps(String internshipTitle) {
+        List<String> repIds = new ArrayList<>();
+        
+        // Read internships_reps_map.csv to find rep IDs for this internship
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_REPS_MAP_CSV))) {
+            String line;
+            String[] header = null;
+            int titleCol = -1, repCol = -1;
+            
+            if ((line = br.readLine()) != null) {
+                header = line.split(",", -1);
+                for (int i = 0; i < header.length; i++) {
+                    if (header[i].trim().equalsIgnoreCase("Title")) titleCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("CompanyRep")) repCol = i;
+                }
+            }
+            
+            if (titleCol == -1 || repCol == -1) return;
+            
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] row = line.split(",", -1);
+                
+                if (row.length > titleCol && row.length > repCol && 
+                    row[titleCol].trim().equalsIgnoreCase(internshipTitle)) {
+                    repIds.add(row[repCol].trim());
+                }
+            }
+        } catch (IOException e) {
+            return; // Silently fail if mapping file doesn't exist
+        }
+        
+        if (repIds.isEmpty()) return;
+        
+        // Load rep details from company_reps_list.csv
+        List<String> repDetails = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.REPS_CSV))) {
+            String line;
+            String[] header = null;
+            int idCol = -1, nameCol = -1;
+            
+            if ((line = br.readLine()) != null) {
+                header = line.split(",", -1);
+                for (int i = 0; i < header.length; i++) {
+                    if (header[i].trim().equalsIgnoreCase("ID")) idCol = i;
+                    else if (header[i].trim().equalsIgnoreCase("Name")) nameCol = i;
+                }
+            }
+            
+            if (idCol == -1 || nameCol == -1) return;
+            
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] row = line.split(",", -1);
+                
+                if (row.length > idCol && repIds.contains(row[idCol].trim())) {
+                    String email = row[idCol].trim();
+                    String name = row.length > nameCol ? row[nameCol].trim() : "Unknown";
+                    repDetails.add(email + " (" + name + ")");
+                }
+            }
+        } catch (IOException e) {
+            return;
+        }
+        
+        if (!repDetails.isEmpty()) {
+            System.out.println("Managed by: " + String.join(", ", repDetails));
+        }
     }
 }

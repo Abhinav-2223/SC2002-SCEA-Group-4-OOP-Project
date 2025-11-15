@@ -171,32 +171,96 @@ public class CompanyRep extends User {
     }
 
     // max 5 internships/company, max 10 slots each
-    public void createInternships(Scanner scanner){
+    private void createInternships(Scanner scanner){
         switch (regStatus){
             case RepRegistrationStatus.APPROVED -> {
+                // TC10 Fix: Check max 5 opportunities limit
+                if (internshipsCreated >= 5) {
+                    System.out.println("Maximum limit of 5 internship opportunities reached. Cannot create more.");
+                    return;
+                }
+                
                 System.out.println("# - Create Internship Opportunity");
                 System.out.print("Enter internship title: ");
                 String title = scanner.nextLine().trim();
+                
+                // TC10 Fix: Validate title not empty
+                if (title.isEmpty()) {
+                    System.out.println("Error: Title cannot be empty. Internship creation cancelled.");
+                    return;
+                }
+                
                 System.out.print("Enter description: ");
                 String desc = scanner.nextLine().trim();
+                
+                if (desc.isEmpty()) {
+                    System.out.println("Error: Description cannot be empty. Internship creation cancelled.");
+                    return;
+                }
+                
                 System.out.print("Enter internship level (Basic/Intermediate/Advanced): ");
                 String internshipLevelInput = scanner.nextLine().trim();
-                InternshipLevel internshipLevel = InternshipLevel.valueOf(internshipLevelInput.toUpperCase());
+                InternshipLevel internshipLevel;
+                
+                // TC10 Fix: Validate enum input with try-catch
+                try {
+                    internshipLevel = InternshipLevel.valueOf(internshipLevelInput.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Error: Invalid internship level. Must be Basic, Intermediate, or Advanced. Internship creation cancelled.");
+                    return;
+                }
 
                 System.out.print("Enter major preference (e.g. Computer Science): ");
                 String preferredMajor = scanner.nextLine().trim();
+                
+                if (preferredMajor.isEmpty()) {
+                    System.out.println("Error: Major preference cannot be empty. Internship creation cancelled.");
+                    return;
+                }
+                
                 System.out.print("Enter Year of Study preference (1/2/3/4): ");
                 String preferredYear = scanner.nextLine().trim();
+                
+                if (preferredYear.isEmpty() || !preferredYear.matches("[1-4]")) {
+                    System.out.println("Error: Year must be 1, 2, 3, or 4. Internship creation cancelled.");
+                    return;
+                }
+                
                 System.out.print("Enter internship opening date (YYYY-MM-DD): ");
                 String openingDate = scanner.nextLine().trim();
+                
+                if (openingDate.isEmpty()) {
+                    System.out.println("Error: Opening date cannot be empty. Internship creation cancelled.");
+                    return;
+                }
+                
                 System.out.print("Enter internship closing date (YYYY-MM-DD): ");
                 String closingDate = scanner.nextLine().trim();
+                
+                if (closingDate.isEmpty()) {
+                    System.out.println("Error: Closing date cannot be empty. Internship creation cancelled.");
+                    return;
+                }
 
                 String regStatus = OpportunityStatus.PENDING.name();
 
                 System.out.println("Enter internship slots (up to 10 maximum)");
-                int slots = scanner.nextInt();
-                scanner.nextLine(); // clear buffer after nextInt()
+                int slots;
+                
+                // TC10 Fix: Validate slots with try-catch and range check
+                try {
+                    slots = scanner.nextInt();
+                    scanner.nextLine(); // clear buffer after nextInt()
+                    
+                    if (slots < 1 || slots > 10) {
+                        System.out.println("Error: Slots must be between 1 and 10. Internship creation cancelled.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    scanner.nextLine(); // clear invalid input
+                    System.out.println("Error: Invalid number format for slots. Internship creation cancelled.");
+                    return;
+                }
 
                 boolean visibility = true;
 
@@ -239,6 +303,13 @@ public class CompanyRep extends User {
                     internshipsCreated++;
                     CompanyRepHelper.updateRepField(getRepId(), "InternshipsCreated", Integer.toString(internshipsCreated));
                     System.out.println("Internship created! Pending approval by Career Center Staff.");
+                    
+                    // Write to internships_reps_map.csv
+                    try (PrintWriter mapOut = new PrintWriter(new FileWriter(FilePaths.INTERNSHIPS_REPS_MAP_CSV, true))) {
+                        mapOut.println(title + "," + getRepId());
+                    } catch (IOException mapErr) {
+                        System.out.println("Warning: Could not update rep mapping: " + mapErr.getMessage());
+                    }
                 } catch (IOException e) {
                     System.out.println("Creation error: " + e.getMessage());
                 }
@@ -249,7 +320,7 @@ public class CompanyRep extends User {
     }
 
     // Display all internships created by this rep
-    public void viewCreatedInternships() {
+    private void viewCreatedInternships() {
         System.out.println("# - Your Created Internships");
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
             String line;
@@ -293,7 +364,7 @@ public class CompanyRep extends User {
     }
     
     // flips value of Visibility in csv for internships created by this rep
-    public void toggleVisibility(Scanner scanner) {
+    private void toggleVisibility(Scanner scanner) {
         System.out.println("# - Toggle Internship Visibility");
         // List internships created by this rep
         try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
@@ -334,10 +405,10 @@ public class CompanyRep extends User {
                 return;
             }
             String[] selected = internships.get(sel - 1);
-            // Flip visibility
+            // flip visibility
             selected[visCol] = selected[visCol].equalsIgnoreCase("true") ? "false" : "true";
-            // Now update the CSV file
-            // Read all rows
+            // ppdate the CSV file
+            // read all rows
             List<String[]> allRows = new ArrayList<>();
             try (BufferedReader br2 = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
                 String l;
@@ -345,7 +416,7 @@ public class CompanyRep extends User {
                     allRows.add(l.split(",", -1));
                 }
             }
-            // Update the row
+            // update the row
             for (int i = 1; i < allRows.size(); i++) {
                 String[] row = allRows.get(i);
                 if (row[titleCol].equals(selected[titleCol]) && row[repCol].equals(selected[repCol])) {
@@ -353,7 +424,7 @@ public class CompanyRep extends User {
                     break;
                 }
             }
-            // Write back
+            // write back to csv
             try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV))) {
                 for (String[] row : allRows) {
                     pw.println(String.join(",", row));
@@ -366,7 +437,7 @@ public class CompanyRep extends User {
     }
 
     // Approve or reject student applications for this rep's internships
-    public void approveRejectInternship(Scanner scanner) {
+    private void approveRejectInternship(Scanner scanner) {
         System.out.println("# - Approve/Reject Student Applications");
         // Read internships for this rep
         List<String> myInternships = new ArrayList<>();
@@ -417,34 +488,18 @@ public class CompanyRep extends User {
                     if (appHeader[i].equalsIgnoreCase("ApplicationStatus")) statusCol = i;
                 }
             }
-            // If ApplicationStatus column is missing, add it
-            if (statusCol == -1) {
-                // Add ApplicationStatus column to header and all rows
-                List<String[]> allRows = new ArrayList<>();
-                allRows.add(appHeader);
-                while ((line = br.readLine()) != null) {
-                    String[] row = line.split(",", -1);
-                    String[] newRow = new String[row.length + 1];
-                    System.arraycopy(row, 0, newRow, 0, row.length);
-                    newRow[newRow.length - 1] = "PENDING";
-                    allRows.add(newRow);
-                }
-                // Write back with new header
-                try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
-                    String[] newHeader = new String[appHeader.length + 1];
-                    System.arraycopy(appHeader, 0, newHeader, 0, appHeader.length);
-                    newHeader[newHeader.length - 1] = "ApplicationStatus";
-                    pw.println(String.join(",", newHeader));
-                    for (int i = 1; i < allRows.size(); i++) {
-                        pw.println(String.join(",", allRows.get(i)));
-                    }
-                }
-                System.out.println("ApplicationStatus column added. Please rerun this option.");
+            if (appliedInternshipCol == -1 || statusCol == -1) {
+                System.out.println("CSV header missing required columns (AppliedInternship or ApplicationStatus).");
                 return;
             }
             // Collect applications for this rep's internships
             while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // skip empty lines
                 String[] row = line.split(",", -1);
+                
+                // Check if row has enough columns
+                if (row.length <= appliedInternshipCol || row.length <= statusCol) continue;
+                
                 if (myInternships.contains(row[appliedInternshipCol]) && row[statusCol].equalsIgnoreCase("PENDING")) {
                     applications.add(row);
                 }
@@ -460,7 +515,10 @@ public class CompanyRep extends User {
         // List applications
         for (int i = 0; i < applications.size(); i++) {
             String[] app = applications.get(i);
-            System.out.printf("%d. Student: %s, Internship: %s, Status: %s\n", i + 1, app[0], app[appliedInternshipCol], app[statusCol]);
+            System.out.printf("%d. Student: %s, Internship: %s, Status: %s\n", i + 1, 
+                app[0], 
+                app.length > appliedInternshipCol ? app[appliedInternshipCol] : "N/A", 
+                app.length > statusCol ? app[statusCol] : "N/A");
         }
         System.out.print("Select application to approve/reject (number): ");
         int sel = scanner.nextInt();
@@ -491,12 +549,15 @@ public class CompanyRep extends User {
             // Find and update the selected application
             for (int i = 1; i < allRows.size(); i++) {
                 String[] row = allRows.get(i);
+                // Check if row has enough columns
+                if (row.length <= appliedInternshipCol || row.length <= statusCol) continue;
+                
                 if (row[appliedInternshipCol].equals(selected[appliedInternshipCol]) && row[0].equals(selected[0])) {
                     row[statusCol] = newStatus;
                     break;
                 }
             }
-            // Write back
+            // Write back to csv
             try (PrintWriter pw = new PrintWriter(new FileWriter(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
                 for (String[] row : allRows) {
                     pw.println(String.join(",", row));
