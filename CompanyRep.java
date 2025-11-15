@@ -182,7 +182,7 @@ public class CompanyRep extends User {
                 String desc = scanner.nextLine().trim();
                 System.out.print("Enter internship level (Basic/Intermediate/Advanced): ");
                 String internshipLevelInput = scanner.nextLine().trim();
-                InternshipLevel internshipLevel = InternshipLevel.valueOf(internshipLevelInput);
+                InternshipLevel internshipLevel = InternshipLevel.valueOf(internshipLevelInput.toUpperCase());
 
                 System.out.print("Enter major preference: ");
                 String preferredMajor = scanner.nextLine().trim();
