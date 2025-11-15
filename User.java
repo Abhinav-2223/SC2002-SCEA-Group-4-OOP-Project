@@ -76,11 +76,9 @@ public abstract class User {
         return false;
     }
 
-    public abstract boolean logout();
     public abstract void runUserUi(Scanner scanner);
     public abstract List<Internships> filteringInternships(String filterType, String filterValue);
 
-    // TODO: test this method; see if works
     public void changePassword(String userId, String domain, Scanner scanner) {
         System.out.println("Enter current password: ");
         String currentPw = scanner.nextLine();

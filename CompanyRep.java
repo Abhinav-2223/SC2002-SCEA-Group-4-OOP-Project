@@ -125,7 +125,7 @@ public class CompanyRep extends User {
                     break;
                 }
                 case 0: {
-                    session = logout();
+                    session = false;
                     break;
                 }
                 default: {
@@ -163,11 +163,6 @@ public class CompanyRep extends User {
         }
         
         return filtered;
-    }
-
-    @Override
-    public boolean logout(){
-        return false;
     }
 
     // max 5 internships/company, max 10 slots each

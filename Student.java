@@ -22,13 +22,7 @@ public class Student extends User {
     public String getMajor() { return this.major; }
     public int getStudyYear() { return this.studyYear; }
 
-
     // implemented inherited abstract methods
-    @Override
-    public boolean logout(){
-        return false;
-    }
-
     @Override
     public void runUserUi(Scanner scanner) {
         int choice = -1;
@@ -120,9 +114,9 @@ public class Student extends User {
     }
 
     // instance methods
-//     Student can view the list of available internships --> need to figure out how to store internships first
+    // Student can view the list of available internships --> need to figure out how to store internships first
     public void viewInternshipList() {
-        //TODO: Need to implement Internships.getAllVisibleInternships() static method
+
         List<Internships> visibleInternships = Internships.getAllVisibleInternships();
         
         // check if there are any visible internships
@@ -200,8 +194,7 @@ public class Student extends User {
 
     }
 
-
-    // Student can view the status of their applications -- TODO: FIX CAN VIEW EVEN AFTER VISIBIITY IS OFF
+    // Student can view their application status
     public void viewApplicationStatus() {
         if (applications.isEmpty()) {
             System.out.println("No applications found.");

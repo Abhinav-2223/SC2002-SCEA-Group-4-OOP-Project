@@ -532,9 +532,4 @@ public class CareerCenStaff extends User{
         } catch (Exception e) { /* ignore */ }
         return 0;
     }
-
-    @Override
-    public boolean logout() {
-        return false;
-    }
 }
