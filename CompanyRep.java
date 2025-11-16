@@ -70,7 +70,7 @@ public class CompanyRep extends User {
              PrintWriter out = new PrintWriter(bw)) {
 
             // Follow the exact CSV header order:
-            // appends based on sequence (as in csv file): ID,Password,Name,CompanyName,Department,Position,regStatus
+            // appends based on sequence (as in csv file): ID,Password,Name,CompanyName,Department,Position,InternshipsCreated,RegStatus
             out.println(String.join(",",
                     id,
                     "password", // default password
@@ -78,6 +78,7 @@ public class CompanyRep extends User {
                     companyName,
                     dept,
                     position,
+                    "0", // default InternshipsCreated to 0
                     regStatus
             ));
 
@@ -94,12 +95,13 @@ public class CompanyRep extends User {
         boolean session = true;
 
         while(session) {
-            System.out.println("# Company Rep Dashboard - Welcome: " + this.getRepName() + " #");
+            System.out.println("=== Company Rep Dashboard - Welcome: " + this.getRepName() + " ===");
             System.out.println("1. View created internships");
             System.out.println("2. Create internships");
-            System.out.println("3. Approve/Reject internships");
-            System.out.println("4. Toggle internship visibility");
-            System.out.println("5. Change Password");
+            System.out.println("3. Delete internship");
+            System.out.println("4. Approve/Reject internships");
+            System.out.println("5. Toggle internship visibility");
+            System.out.println("6. Change Password");
             System.out.println("0. Logout");
 
             int choice = scanner.nextInt();
@@ -118,14 +120,18 @@ public class CompanyRep extends User {
                     break;
                 }
                 case 3: {
-                    approveRejectInternship(scanner);
+                    deleteInternship(scanner);
                     break;
                 }
                 case 4: {
-                    toggleVisibility(scanner);
+                    approveRejectInternship(scanner);
                     break;
                 }
                 case 5: {
+                    toggleVisibility(scanner);
+                    break;
+                }
+                case 6: {
                     changePassword(this.getRepId(), "companyrep", scanner);
                     break;
                 }
@@ -170,8 +176,211 @@ public class CompanyRep extends User {
         return filtered;
     }
 
-    // max 5 internships/company, max 10 slots each
-    private void createInternships(Scanner scanner){
+    // delete internship and handle all related data
+    private void deleteInternship(Scanner scanner) {
+        System.out.println("\n--- Delete Internship ---");
+        
+        // show created internships first
+        viewCreatedInternships();
+        
+        System.out.print("\nEnter internship title to delete (or 'cancel' to abort): ");
+        String title = scanner.nextLine().trim();
+        
+        if (title.equalsIgnoreCase("cancel")) {
+            System.out.println("Deletion cancelled.");
+            return;
+        }
+        
+        // verify internship belongs to this rep
+        List<String> repInternships = Helper.getInternshipRepsFor(title);
+        if (repInternships == null || !repInternships.contains(this.getRepId())) {
+            System.out.println("Error: Internship not found or you do not have permission to delete it.");
+            return;
+        }
+        
+        // confirm deletion
+        System.out.print("Are you sure you want to delete '" + title + "'? This will remove all related applications. (yes/no): ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        
+        if (!confirm.equals("yes")) {
+            System.out.println("Deletion cancelled.");
+            return;
+        }
+        
+        boolean internshipDeleted = false;
+        // boolean mappingDeleted = false;
+        // boolean applicationsHandled = false;
+        
+        // case 1: remove from internships_list.csv
+        try {
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_LIST_CSV))) {
+                String line;
+                String[] header = null;
+                int titleCol = -1;
+                
+                if ((line = br.readLine()) != null) {
+                    header = line.split(",", -1);
+                    lines.add(line); // keep header
+                    
+                    for (int i = 0; i < header.length; i++) {
+                        if (header[i].trim().equalsIgnoreCase("Title")) {
+                            titleCol = i;
+                            break;
+                        }
+                    }
+                }
+                
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] row = line.split(",", -1);
+                    String internTitle = titleCol >= 0 && row.length > titleCol ? row[titleCol].trim() : "";
+                    
+                    // skip the internship to delete
+                    if (!internTitle.equalsIgnoreCase(title)) {
+                        lines.add(line);
+                    } else {
+                        internshipDeleted = true;
+                    }
+                }
+            }
+            
+            // write back
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(FilePaths.INTERNSHIPS_LIST_CSV))) {
+                for (String line : lines) {
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error deleting internship: " + e.getMessage());
+            return;
+        }
+        
+        // case 2: remove from internships_reps_map.csv
+        try {
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIPS_REPS_MAP_CSV))) {
+                String line;
+                if ((line = br.readLine()) != null) {
+                    lines.add(line); // keep header
+                }
+                
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] parts = line.split(",", -1);
+                    String mapTitle = parts.length > 0 ? parts[0].trim() : "";
+                    
+                    // skip the mapping to delete
+                    if (!mapTitle.equalsIgnoreCase(title)) {
+                        lines.add(line);
+                    } else {
+                        // mappingDeleted = true;
+                    }
+                }
+            }
+            
+            // write back
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(FilePaths.INTERNSHIPS_REPS_MAP_CSV))) {
+                for (String line : lines) {
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Warning: Could not update internship mapping: " + e.getMessage());
+        }
+        
+        // case 3: handle student applications - mark as withdrawn
+        try {
+            List<String> lines = new ArrayList<>();
+            int affectedStudents = 0;
+            boolean hasAcceptedStudent = false;
+            
+            try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
+                String line;
+                String[] header = null;
+                int internTitleCol = -1, statusCol = -1;
+                
+                if ((line = br.readLine()) != null) {
+                    header = line.split(",", -1);
+                    lines.add(line); // keep header
+                    
+                    for (int i = 0; i < header.length; i++) {
+                        if (header[i].trim().equalsIgnoreCase("AppliedInternship")) internTitleCol = i;
+                        else if (header[i].trim().equalsIgnoreCase("ApplicationStatus")) statusCol = i;
+                    }
+                }
+                
+                while ((line = br.readLine()) != null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] row = line.split(",", -1);
+                    String appliedIntern = internTitleCol >= 0 && row.length > internTitleCol ? row[internTitleCol].trim() : "";
+                    String status = statusCol >= 0 && row.length > statusCol ? row[statusCol].trim() : "";
+                    
+                    if (appliedIntern.equalsIgnoreCase(title)) {
+                        affectedStudents++;
+                        if (status.equalsIgnoreCase("ACCEPTED")) {
+                            hasAcceptedStudent = true;
+                        }
+                        // mark application as withdrawn due to internship deletion
+                        if (statusCol >= 0 && row.length > statusCol) {
+                            row[statusCol] = "WITHDRAWN";
+                        }
+                        lines.add(String.join(",", row));
+                    } else {
+                        lines.add(line);
+                    }
+                }
+            }
+            
+            // write back
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
+                for (String line : lines) {
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+            
+            // applicationsHandled = true;
+            
+            if (affectedStudents > 0) {
+                System.out.println("Note: " + affectedStudents + " student application(s) have been automatically withdrawn.");
+                if (hasAcceptedStudent) {
+                    System.out.println("WARNING: At least one student had ACCEPTED this internship. They have been withdrawn.");
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Warning: Could not update student applications: " + e.getMessage());
+        }
+        
+        // step 4: decrement internshipsCreated counter
+        if (internshipDeleted) {
+            try {
+                int currentCount = Integer.parseInt(Objects.requireNonNull(Helper.csvExtractFields("InternshipsCreated", getRepId(), "companyrep")));
+                if (currentCount > 0) {
+                    internshipsCreated = currentCount - 1;
+                    CompanyRepHelper.updateRepField(getRepId(), "InternshipsCreated", String.valueOf(internshipsCreated));
+                }
+            } catch (Exception e) {
+                System.out.println("Warning: Could not update internship counter: " + e.getMessage());
+            }
+        }
+        
+        // final status
+        if (internshipDeleted) {
+            System.out.println("\nInternship '" + title + "' has been successfully deleted.");
+            // DEBUG STUFF
+            // System.out.println("- Internship listing removed");
+            // if (mappingDeleted) System.out.println("- Rep mapping removed");
+            // if (applicationsHandled) System.out.println("- Student applications handled");
+            // System.out.println("- Internship counter updated");
+        } else {
+            System.out.println("Error: Internship '" + title + "' was not found.");
+        }
+    }
+
+    private void createInternships(Scanner scanner) {
         switch (regStatus){
             case RepRegistrationStatus.APPROVED -> {
                 // enforce maximum 5 internship opportunities per company rep
