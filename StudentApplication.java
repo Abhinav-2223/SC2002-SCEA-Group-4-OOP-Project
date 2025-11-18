@@ -36,7 +36,6 @@ public class StudentApplication {
     }
 
     //getters
-    public String getApplicationID() { return applicationID; }
     public Student getStudent() { return student; }
     public Internships getInternship() { return internships; }
     public ApplicationStatus getAppStatus() { return appStatus; }

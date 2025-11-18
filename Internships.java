@@ -44,11 +44,9 @@ public class Internships {
     public InternshipLevel getInternshipLevel() { return internshipLevel; }
     public String getPreferredMajor() { return preferredMajor; }
     public int getPreferredYear() { return preferredYear; }
-    public int getOpeningDate() { return openingDate; }
     public int getClosingDate() { return closingDate; }
     public OpportunityStatus getOpportunityStatus() { return oppStatus; }
     public String getCompanyName() { return companyName; }
-    public String[] getCompanyReps() { return companyReps; }
     public int getSlots() { return slots; }
     public boolean isVisible() { return isVisible; }
     public boolean isApprovedByStaff() { return isApprovedByStaff; }

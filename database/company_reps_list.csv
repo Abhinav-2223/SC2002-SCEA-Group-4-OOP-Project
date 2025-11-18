@@ -1,3 +1,5 @@
 ID,Password,Name,CompanyName,Department,Position,InternshipsCreated,RegStatus
 test@testing.com,password,Bob Thomas,Testing Pte Ltd.,Testing,Tester,1,APPROVED
 test2@testing.com,password,tester2,testing,testing,tester,0,APPROVED
+test3@testing.com,password,tester3,testing,testing,tester,0,PENDING
+test0@testing.com,password,Tester0,Testing,Tester,Tester,1,APPROVED

@@ -62,7 +62,7 @@ public class IPMSystemApp {
 
             isLoggedIn = true;
 
-            // branches to individual subclass (routes program interface to implemented stuff within each subclass)
+            // branches to individual subclass (routes program flow to implemented stuff within each subclass)
             switch (user.getDomain()) {
                 case "student":{
                     user.runUserUi(scanner);

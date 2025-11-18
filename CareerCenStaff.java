@@ -28,12 +28,12 @@ public class CareerCenStaff extends User{
         boolean running = true;
         while (running) {
             System.out.println("\n=== Career Centre Staff Dashboard ===");
-            System.out.println("1. Authorize Company Representative");
-            System.out.println("2. Approve Internship Opportunity");
-            System.out.println("3. Reject Internship Opportunity");
-            System.out.println("4. Approve Withdrawal Request");
-            System.out.println("5. Generate Report");
-            System.out.println("6. Filter Internships");
+            System.out.println("1. View All Internships");
+            System.out.println("2. Authorize Company Representative");
+            System.out.println("3. Approve Internship Opportunity");
+            System.out.println("4. Reject Internship Opportunity");
+            System.out.println("5. Approve Withdrawal Request");
+            System.out.println("6. Generate Report");
             System.out.println("7. Change Password");
             System.out.println("0. Logout");
             System.out.print("Enter choice: ");
@@ -42,34 +42,34 @@ public class CareerCenStaff extends User{
             
             switch (choice) {
                 case "1":
+                    viewAllInternships(scanner);
+                    break;
+                case "2":
                     // show pending company reps before prompting
                     showPendingCompanyReps();
                     System.out.print("Enter Company Rep ID to authorize: ");
                     String repId = scanner.nextLine().trim();
                     authorizeCompanyRep(repId);
                     break;
-                case "2":
+                case "3":
                     // show pending internships before prompting
                     showPendingInternships();
                     System.out.print("Enter Internship Title to approve: ");
                     String internTitle = scanner.nextLine().trim();
                     approveInternship(internTitle);
                     break;
-                case "3":
+                case "4":
                     // show pending internships before prompting for rejection
                     showPendingInternships();
                     System.out.print("Enter Internship Title to reject: ");
                     String rejectTitle = scanner.nextLine().trim();
                     rejectInternship(rejectTitle);
                     break;
-                case "4":
+                case "5":
                     approveWithdrawalRequestMenu(scanner);
                     break;
-                case "5":
-                    generateReport();
-                    break;
                 case "6":
-                    filterInternshipsMenu(scanner);
+                    generateReport();
                     break;
                 case "7":
                     changePassword(this.getUserId(), "staff", scanner);
@@ -454,49 +454,119 @@ public class CareerCenStaff extends User{
         }
     }
 
-    // menu for filtering internships
-    private void filterInternshipsMenu(Scanner scanner) {
-        System.out.println("\n=== Filter Internships ===");
-        System.out.println("1. Filter by Status");
-        System.out.println("2. Filter by Major");
-        System.out.println("3. Filter by Level");
-        System.out.println("4. Filter by Company");
+    // view all internships with filtering options
+    private void viewAllInternships(Scanner scanner) {
+        // Load all internships
+        List<Internships> allInternships = CSVUtils.readInternshipsFromCSV(null);
+        
+        if (allInternships.isEmpty()) {
+            System.out.println("No internships available.");
+            return;
+        }
+        
+        // Sort alphabetically by title (A-Z)
+        allInternships.sort((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()));
+        
+        // Display all internships first (default alphabetical view)
+        System.out.println("\n=== All Internships (Alphabetically) ===");
+        for (Internships internship : allInternships) {
+            System.out.println("------------------------------");
+            System.out.println("Title: " + internship.getTitle());
+            System.out.println("Company: " + internship.getCompanyName());
+            System.out.println("Description: " + internship.getDescription());
+            System.out.println("Level: " + internship.getInternshipLevel());
+            System.out.println("Major: " + internship.getPreferredMajor());
+            System.out.println("Year: " + internship.getPreferredYear());
+            System.out.println("Closing Date: " + internship.getClosingDate());
+            System.out.println("Status: " + internship.getOpportunityStatus());
+            System.out.println("Slots: " + internship.getSlots());
+            System.out.println("Visible: " + (internship.isVisible() ? "Yes" : "No"));
+            System.out.println("Approved: " + (internship.isApprovedByStaff() ? "Yes" : "No"));
+        }
+        System.out.println("------------------------------");
+        
+        // Ask if user wants to filter/sort
+        System.out.println("\n=== Filter/Sort Options ===");
+        System.out.println("1. Keep current view (Alphabetically)");
+        System.out.println("2. Filter by Status");
+        System.out.println("3. Filter by Major");
+        System.out.println("4. Filter by Level");
+        System.out.println("5. Sort by Closing Date");
+        System.out.println("0. Back to Main Menu");
         System.out.print("Enter choice: ");
         
         String choice = scanner.nextLine().trim();
-        String filterType = "";
+        
+        List<Internships> displayList = new ArrayList<>(allInternships);
         
         switch (choice) {
-            case "1": filterType = "status"; break;
-            case "2": filterType = "major"; break;
-            case "3": filterType = "level"; break;
-            case "4": filterType = "company"; break;
-            default:
+            case "1" -> {
+                // Already displayed, just return
+                return;
+            }
+            case "2" -> {
+                System.out.print("Enter status (PENDING/VACANT/FILLED/REJECTED): ");
+                String status = scanner.nextLine().trim().toUpperCase();
+                displayList = allInternships.stream()
+                    .filter(i -> i.getOpportunityStatus().name().equalsIgnoreCase(status))
+                    .sorted((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()))
+                    .collect(java.util.stream.Collectors.toList());
+                setFilterPreference("status", status);
+            }
+            case "3" -> {
+                System.out.print("Enter major: ");
+                String major = scanner.nextLine().trim();
+                displayList = allInternships.stream()
+                    .filter(i -> i.getPreferredMajor().equalsIgnoreCase(major))
+                    .sorted((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()))
+                    .collect(java.util.stream.Collectors.toList());
+                setFilterPreference("major", major);
+            }
+            case "4" -> {
+                System.out.print("Enter level (BASIC/INTERMEDIATE/ADVANCED): ");
+                String level = scanner.nextLine().trim().toUpperCase();
+                displayList = allInternships.stream()
+                    .filter(i -> i.getInternshipLevel().name().equalsIgnoreCase(level))
+                    .sorted((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()))
+                    .collect(java.util.stream.Collectors.toList());
+                setFilterPreference("level", level);
+            }
+            case "5" -> {
+                // Sort by closing date (earliest first)
+                displayList.sort((a, b) -> Integer.compare(a.getClosingDate(), b.getClosingDate()));
+                setFilterPreference("closingdate", "applied");
+            }
+            case "0" -> {
+                return;
+            }
+            default -> {
                 System.out.println("Invalid choice!");
                 return;
-        }
-        
-        System.out.print("Enter filter value: ");
-        String filterValue = scanner.nextLine().trim();
-        
-        List<Internships> filtered = filteringInternships(filterType, filterValue);
-        
-        if (filtered.isEmpty()) {
-            System.out.println("No internships match the filter.");
-        } else {
-            System.out.println("\n=== Filtered Internships ===");
-            for (Internships internship : filtered) {
-                System.out.println("Title: " + internship.getTitle());
-                System.out.println("Company: " + internship.getCompanyName());
-                System.out.println("Level: " + internship.getInternshipLevel());
-                System.out.println("Major: " + internship.getPreferredMajor());
-                System.out.println("Status: " + internship.getOpportunityStatus());
-                System.out.println("---");
             }
         }
         
-        // save filter preference
-        setFilterPreference(filterType, filterValue);
+        // Display filtered/sorted internships
+        if (displayList.isEmpty()) {
+            System.out.println("\nNo internships match the criteria.");
+            return;
+        }
+        
+        System.out.println("\n=== Filtered/Sorted Internships ===");
+        for (Internships internship : displayList) {
+            System.out.println("------------------------------");
+            System.out.println("Title: " + internship.getTitle());
+            System.out.println("Company: " + internship.getCompanyName());
+            System.out.println("Description: " + internship.getDescription());
+            System.out.println("Level: " + internship.getInternshipLevel());
+            System.out.println("Major: " + internship.getPreferredMajor());
+            System.out.println("Year: " + internship.getPreferredYear());
+            System.out.println("Closing Date: " + internship.getClosingDate());
+            System.out.println("Status: " + internship.getOpportunityStatus());
+            System.out.println("Slots: " + internship.getSlots());
+            System.out.println("Visible: " + (internship.isVisible() ? "Yes" : "No"));
+            System.out.println("Approved: " + (internship.isApprovedByStaff() ? "Yes" : "No"));
+        }
+        System.out.println("------------------------------");
     }
 
     @Override

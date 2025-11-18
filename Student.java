@@ -93,11 +93,6 @@ public class Student extends User {
         applications.addAll(allApplications);
     }
 
-    // class methods
-    public static void studentUI(){
-        System.out.println("I am Student");
-    }
-
     private void applyInternship(Scanner scanner) {
         System.out.println("\n--- Apply for Internship ---");
         
@@ -122,11 +117,49 @@ public class Student extends User {
 
     private void acceptInternship(Scanner scanner) {
         System.out.println("\n--- Accept Internship ---");
-        System.out.print("Enter internship title to accept: ");
-        String title = scanner.nextLine();
+        
+        // Check if student has already accepted an internship
+        if (!acceptedapplications.equals("NONE")) {
+            System.out.println("You have already accepted an internship placement: " + acceptedapplications);
+            return;
+        }
+        
+        // Load all applications for this student
+        List<StudentApplication> allApplications = StudentApplication.loadApplicationsFromCSV(this.getUserId());
+        List<StudentApplication> acceptableApps = new ArrayList<>();
+        
+        // Filter for SUCCESSFUL applications (approved by Company Rep)
+        for (StudentApplication app : allApplications) {
+            if (app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
+                acceptableApps.add(app);
+            }
+        }
+        
+        // Display acceptable internships
+        if (acceptableApps.isEmpty()) {
+            System.out.println("No internship offers available to accept.");
+            System.out.println("You need to wait for Company Representatives to approve your applications.");
+            return;
+        }
+        
+        System.out.println("\n=== Internships Available to Accept ===");
+        for (StudentApplication app : acceptableApps) {
+            Internships internship = app.getInternship();
+            System.out.println("------------------------------");
+            System.out.println("Title: " + internship.getTitle());
+            System.out.println("Company: " + internship.getCompanyName());
+            System.out.println("Description: " + internship.getDescription());
+            System.out.println("Level: " + internship.getInternshipLevel());
+            System.out.println("Major: " + internship.getPreferredMajor());
+            System.out.println("Application Status: " + app.getAppStatus());
+        }
+        System.out.println("------------------------------");
+        
+        System.out.print("\nEnter internship title to accept: ");
+        String title = scanner.nextLine().trim();
 
         Internships targetInternship = CSVUtils.findInternshipByTitle(
-            Internships.getAllVisibleInternships(), title
+            CSVUtils.readInternshipsFromCSV(null), title
         );
         
         if (targetInternship == null) {

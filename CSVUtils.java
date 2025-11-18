@@ -141,17 +141,6 @@ public class CSVUtils {
     }
     
     /**
-     * Formats an integer date (YYYYMMDD) to string format (YYYY-MM-DD).
-     */
-    public static String formatDate(int dateInt) {
-        if (dateInt == 0) return "N/A";
-        int year = dateInt / 10000;
-        int month = (dateInt % 10000) / 100;
-        int day = dateInt % 100;
-        return String.format("%04d-%02d-%02d", year, month, day);
-    }
-    
-    /**
      * Updates a CSV file by applying a row transformer function.
      * @param filePath Path to the CSV file
      * @param transformer Function that takes a row and returns updated row (or null to skip)
