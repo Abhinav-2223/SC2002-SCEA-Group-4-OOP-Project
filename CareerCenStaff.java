@@ -2,7 +2,6 @@ import database.FilePaths;
 import enums.InternshipLevel;
 import enums.OpportunityStatus;
 import enums.RepRegistrationStatus;
-import enums.WithdrawalDecision;
 
 import java.io.*;
 import java.util.*;
@@ -289,7 +288,7 @@ public class CareerCenStaff extends User{
 
     // menu for approving withdrawal requests
     private void approveWithdrawalRequestMenu(Scanner scanner) {
-        // read all pending withdrawals from applications CSV
+        // read all pending withdrawals from applications CSV (status = PENDING_WITHDRAWAL)
         List<String[]> pendingWithdrawals = new ArrayList<>();
         String[] header = null;
         
@@ -302,25 +301,34 @@ public class CareerCenStaff extends User{
             
             if (header == null) return;
             
-            // find column index for withdrawal decision
-            int withdrawCol = -1;
+            // find column indices
+            int idCol = -1, internshipCol = -1, statusCol = -1;
             for (int i = 0; i < header.length; i++) {
                 String h = header[i].trim().toLowerCase();
-                if (h.equals("withdrawaldecision")) {
-                    withdrawCol = i;
-                    break;
+                if (h.equals("id")) {
+                    idCol = i;
+                } else if (h.equals("appliedinternship")) {
+                    internshipCol = i;
+                } else if (h.equals("applicationstatus")) {
+                    statusCol = i;
                 }
             }
             
-            // read applications with pending withdrawals
+            // Validate that we found all required columns
+            if (idCol < 0 || internshipCol < 0 || statusCol < 0) {
+                System.out.println("Error: Required columns not found in CSV.");
+                return;
+            }
+            
+            // read applications with PENDING_WITHDRAWAL status
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 String[] row = line.split(",", -1);
                 
-                String withdrawStatus = withdrawCol >= 0 && row.length > withdrawCol ? 
-                                       row[withdrawCol].trim() : "NONE";
+                String status = statusCol >= 0 && row.length > statusCol ? 
+                               row[statusCol].trim() : "";
                 
-                if (withdrawStatus.equalsIgnoreCase("PENDING")) {
+                if (status.equalsIgnoreCase("PENDING_WITHDRAWAL")) {
                     pendingWithdrawals.add(row);
                 }
             }
@@ -336,9 +344,29 @@ public class CareerCenStaff extends User{
         
         // display pending withdrawals
         System.out.println("\n=== Pending Withdrawal Requests ===");
+        
+        // Re-read to get column indices for display (they were local to try block)
+        int displayIdCol = -1, displayInternshipCol = -1;
+        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
+            String line = br.readLine();
+            if (line != null) {
+                String[] headerRow = line.split(",", -1);
+                for (int i = 0; i < headerRow.length; i++) {
+                    String h = headerRow[i].trim().toLowerCase();
+                    if (h.equals("id")) displayIdCol = i;
+                    else if (h.equals("appliedinternship")) displayInternshipCol = i;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading header: " + e.getMessage());
+            return;
+        }
+        
         for (int i = 0; i < pendingWithdrawals.size(); i++) {
             String[] row = pendingWithdrawals.get(i);
-            System.out.println((i + 1) + ". Student: " + row[0] + ", Internship: " + row[1]);
+            String studentId = displayIdCol >= 0 && row.length > displayIdCol ? row[displayIdCol] : "Unknown";
+            String internship = displayInternshipCol >= 0 && row.length > displayInternshipCol ? row[displayInternshipCol] : "Unknown";
+            System.out.println((i + 1) + ". Student ID: " + studentId + ", Internship: " + internship + ", Status: PENDING_WITHDRAWAL");
         }
         
         System.out.print("Select withdrawal request to process (0 to cancel): ");
@@ -352,79 +380,24 @@ public class CareerCenStaff extends User{
         System.out.print("Approve withdrawal? (yes/no): ");
         String decision = scanner.nextLine().trim().toLowerCase();
         
-        WithdrawalDecision finalDecision = decision.equals("yes") ? 
-                                           WithdrawalDecision.APPROVED : 
-                                           WithdrawalDecision.REJECTED;
-        
-        // update the application
+        // update the application status based on decision
         String[] selectedRow = pendingWithdrawals.get(choice - 1);
-        updateWithdrawalDecision(selectedRow[0], selectedRow[1], finalDecision);
-    }
-
-    // update withdrawal decision in CSV
-    private void updateWithdrawalDecision(String studentId, String internshipTitle, WithdrawalDecision decision) {
-        List<String> lines = new ArrayList<>();
+        String studentId = displayIdCol >= 0 && selectedRow.length > displayIdCol ? selectedRow[displayIdCol] : "";
+        String internship = displayInternshipCol >= 0 && selectedRow.length > displayInternshipCol ? selectedRow[displayInternshipCol] : "";
         
-        try (BufferedReader br = new BufferedReader(new FileReader(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
-            String line;
-            String[] header = null;
+        if (decision.equals("yes")) {
+            // Approve: Change status to WITHDRAWN
+            StudentApplication.updateApplicationStatus(studentId, internship, "WITHDRAWN");
+            System.out.println("Withdrawal approved. Application status changed to WITHDRAWN.");
             
-            if ((line = br.readLine()) != null) {
-                header = line.split(",", -1);
-                lines.add(line);
+            // Return slot to internship
+            if (SlotManager.updateSlotCount(internship, +1)) {
+                System.out.println("Slot returned for internship: " + internship);
             }
-            
-            if (header == null) return;
-            
-            // find column indices
-            int studentIdCol = -1, titleCol = -1, withdrawCol = -1;
-            for (int i = 0; i < header.length; i++) {
-                String h = header[i].trim().toLowerCase();
-                if (h.equals("studentid")) studentIdCol = i;
-                else if (h.equals("internshiptitle")) titleCol = i;
-                else if (h.equals("withdrawaldecision")) withdrawCol = i;
-            }
-            
-            // read and update rows
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                
-                String[] row = line.split(",", -1);
-                
-                String sid = studentIdCol >= 0 && row.length > studentIdCol ? row[studentIdCol].trim() : "";
-                String title = titleCol >= 0 && row.length > titleCol ? row[titleCol].trim() : "";
-                
-                if (sid.equals(studentId) && title.equalsIgnoreCase(internshipTitle)) {
-                    // update withdrawal decision
-                    if (withdrawCol >= 0 && row.length > withdrawCol) {
-                        row[withdrawCol] = decision.name();
-                    }
-                    lines.add(String.join(",", row));
-                    System.out.println("Withdrawal decision updated to " + decision + ".");
-                    
-                    // return slot to internship if withdrawal is approved
-                    if (decision == WithdrawalDecision.APPROVED) {
-                        if (SlotManager.updateSlotCount(internshipTitle, +1)) {
-                            System.out.println("Slot returned for internship: " + internshipTitle);
-                        }
-                    }
-                } else {
-                    lines.add(line);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading applications CSV: " + e.getMessage());
-            return;
-        }
-        
-        // write back to CSV
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FilePaths.INTERNSHIP_APPLICATIONS_CSV))) {
-            for (String line : lines) {
-                bw.write(line);
-                bw.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Error writing to applications CSV: " + e.getMessage());
+        } else {
+            // Reject: Revert status back to PENDING
+            StudentApplication.updateApplicationStatus(studentId, internship, "PENDING");
+            System.out.println("Withdrawal rejected. Application status reverted to PENDING.");
         }
     }
 

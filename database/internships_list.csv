@@ -1,3 +1,4 @@
 Title,Description,InternLevel,PreferredMajor,PreferredYear,OpeningDate,ClosingDate,OpportunityStatus,CompanyName,Slots,Visibility
 Testing 2,testing,BASIC,Computer Science,2,2025-01-25,2025-06-31,VACANT,Testing Pte Ltd.,10,true
-Testing0,test,BASIC,Computer Science,2,2025-05-23,2025-12-31,VACANT,Testing,8,true
+Testing0,test,BASIC,Computer Science,2,2025-05-23,2025-12-31,VACANT,Testing,9,true
+Sc2002,testing,BASIC,Computer Science,2,2025-04-1,2025-06-2,VACANT,b,11,true

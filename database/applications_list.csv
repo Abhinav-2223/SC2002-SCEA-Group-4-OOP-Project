@@ -1,4 +1,4 @@
 ID,Name,Major,Year,Email,AppliedInternship,ApplicationStatus
-U1234567X,Tester,Computer Science,2,U1234567X,Testing Intern,WITHDRAWN
-U1234567X,Tester,Computer Science,2,U1234567X,Testing0,ACCEPTED
 U2310001A,Tan Wei Ling,Computer Science,2,U2310001A,Testing0,ACCEPTED
+U1234567X,Tester,Computer Science,2,U1234567X,Testing0,WITHDRAWN
+U1234567X,Tester,Computer Science,2,U1234567X,Sc2002,WITHDRAWN

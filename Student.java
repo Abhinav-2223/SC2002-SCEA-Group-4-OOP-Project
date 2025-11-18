@@ -180,13 +180,20 @@ public class Student extends User {
         System.out.println("-------------------------");
         
         for (StudentApplication app : allApplications) {
-            // Only show applications that can be withdrawn (PENDING or SUCCESSFUL, not WITHDRAWN or ACCEPTED)
+            // Only show applications that can be withdrawn (PENDING or SUCCESSFUL)
+            // Exclude WITHDRAWN, ACCEPTED, UNSUCCESSFUL, and PENDING_WITHDRAWAL (already requested)
             if (app.getAppStatus() == enums.ApplicationStatus.PENDING || 
                 app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
                 withdrawableApps.add(app);
                 System.out.println("Title: " + app.getInternship().getTitle());
                 System.out.println("Company: " + app.getInternship().getCompanyName());
                 System.out.println("Status: " + app.getAppStatus());
+                System.out.println("-------------------------");
+            } else if (app.getAppStatus() == enums.ApplicationStatus.PENDING_WITHDRAWAL) {
+                // Show PENDING_WITHDRAWAL status but don't allow re-requesting
+                System.out.println("Title: " + app.getInternship().getTitle());
+                System.out.println("Company: " + app.getInternship().getCompanyName());
+                System.out.println("Status: " + app.getAppStatus() + " (Awaiting Staff Approval)");
                 System.out.println("-------------------------");
             }
         }
@@ -296,9 +303,10 @@ public class Student extends User {
                     return;
                 }
             }
-            // Count active applications
+            // Count active applications (exclude WITHDRAWN, ACCEPTED, and PENDING_WITHDRAWAL)
             if (app.getAppStatus() != enums.ApplicationStatus.WITHDRAWN && 
-                app.getAppStatus() != enums.ApplicationStatus.ACCEPTED) {
+                app.getAppStatus() != enums.ApplicationStatus.ACCEPTED &&
+                app.getAppStatus() != enums.ApplicationStatus.PENDING_WITHDRAWAL) {
                 activeApplicationCount++;
             }
         }
@@ -419,13 +427,21 @@ public class Student extends User {
         for (StudentApplication app : allApplications) {
             if (app.getInternship().getTitle().equals(internship.getTitle())) {
 
-                if (app.getAppStatus() == enums.ApplicationStatus.PENDING) {
-                    // Update status to WITHDRAWN in CSV
-                    StudentApplication.updateApplicationStatus(this.getUserId(), internship.getTitle(), "WITHDRAWN");
-                    System.out.println("Application withdrawn for internship: " + internship.getTitle());
+                if (app.getAppStatus() == enums.ApplicationStatus.PENDING || 
+                    app.getAppStatus() == enums.ApplicationStatus.SUCCESSFUL) {
+                    // Update status to PENDING_WITHDRAWAL - requires staff approval
+                    StudentApplication.updateApplicationStatus(this.getUserId(), internship.getTitle(), "PENDING_WITHDRAWAL");
+                    System.out.println("Withdrawal request submitted for internship: " + internship.getTitle());
+                    System.out.println("Status changed to PENDING_WITHDRAWAL. Awaiting Career Center Staff approval.");
                     return;
                 } else if (app.getAppStatus() == enums.ApplicationStatus.WITHDRAWN) {
                     System.out.println("Application has already been withdrawn.");
+                    return;
+                } else if (app.getAppStatus() == enums.ApplicationStatus.PENDING_WITHDRAWAL) {
+                    System.out.println("Withdrawal request is already pending approval from Career Center Staff.");
+                    return;
+                } else if (app.getAppStatus() == enums.ApplicationStatus.ACCEPTED) {
+                    System.out.println("Cannot withdraw accepted placement. This requires special approval from Career Center Staff.");
                     return;
                 } else {
                     System.out.println("Cannot withdraw application. Current status: " + app.getAppStatus());

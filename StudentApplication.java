@@ -56,7 +56,6 @@ public class StudentApplication {
         System.out.println("Preferred Year: " + internships.getPreferredYear());
         System.out.println("Slots: " + internships.getSlots());
         System.out.println("Application Status: " + appStatus);
-        System.out.println("Withdrawal Decision: " + withdrawDecision);
     }
     
     // Write application to CSV file
@@ -166,8 +165,9 @@ public class StudentApplication {
                 String[] row = line.split(",", -1);
                 
                 // Update status if this is the matching row
-                if (row.length > idCol && row[idCol].equals(studentId) && 
-                    row.length > internshipCol && row[internshipCol].equals(internshipTitle)) {
+                if (idCol >= 0 && internshipCol >= 0 && statusCol >= 0 &&
+                    row.length > idCol && row.length > internshipCol && row.length > statusCol &&
+                    row[idCol].equals(studentId) && row[internshipCol].equals(internshipTitle)) {
                     row[statusCol] = newStatus;
                 }
                 allRows.add(row);

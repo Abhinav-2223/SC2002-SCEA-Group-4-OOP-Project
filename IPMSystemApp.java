@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class IPMSystemApp {
@@ -16,8 +17,17 @@ public class IPMSystemApp {
             System.out.println("2. Company Representative Registration");
             System.out.println("0. Exit Application");
             System.out.println("Enter option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // flush buffer
+            
+            int choice;
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine(); // flush buffer
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine(); // clear invalid input
+                continue;
+            }
+            
             switch (choice){
                 case 1:{
                     break; // breaks out of switch to continue normal flow
