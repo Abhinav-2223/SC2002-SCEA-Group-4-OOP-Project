@@ -28,7 +28,7 @@ public class CareerCenStaff extends User{
         while (running) {
             System.out.println("\n=== Career Centre Staff Dashboard ===");
             System.out.println("1. View All Internships");
-            System.out.println("2. Authorize Company Representative");
+            System.out.println("2. Approve/Reject Company Representative");
             System.out.println("3. Approve Internship Opportunity");
             System.out.println("4. Reject Internship Opportunity");
             System.out.println("5. Approve Withdrawal Request");
@@ -46,9 +46,17 @@ public class CareerCenStaff extends User{
                 case "2":
                     // show pending company reps before prompting
                     showPendingCompanyReps();
-                    System.out.print("Enter Company Rep ID to authorize: ");
+                    System.out.print("Enter Company Rep ID to process: ");
                     String repId = scanner.nextLine().trim();
-                    authorizeCompanyRep(repId);
+                    System.out.print("Approve or Reject? (A/R): ");
+                    String decision = scanner.nextLine().trim().toUpperCase();
+                    if (decision.equals("A")) {
+                        approveOrRejectCompanyRep(repId, true);
+                    } else if (decision.equals("R")) {
+                        approveOrRejectCompanyRep(repId, false);
+                    } else {
+                        System.out.println("Invalid choice. Operation cancelled.");
+                    }
                     break;
                 case "3":
                     // show pending internships before prompting
@@ -83,8 +91,8 @@ public class CareerCenStaff extends User{
         }
     }
 
-    // authorize company rep by ID
-    private void authorizeCompanyRep(String repId) {
+    // approve or reject company rep by ID
+    private void approveOrRejectCompanyRep(String repId, boolean approve) {
         List<String> lines = new ArrayList<>();
         boolean found = false;
         
@@ -119,12 +127,12 @@ public class CareerCenStaff extends User{
                 
                 if (row.length > 0 && row[0].trim().equals(repId)) {
                     found = true;
-                    // update registration status to APPROVED
+                    // update registration status to APPROVED or REJECTED
                     if (regStatusCol >= 0 && row.length > regStatusCol) {
-                        row[regStatusCol] = RepRegistrationStatus.APPROVED.name();
+                        row[regStatusCol] = approve ? RepRegistrationStatus.APPROVED.name() : RepRegistrationStatus.REJECTED.name();
                     }
                     lines.add(String.join(",", row));
-                    System.out.println("Company Rep " + repId + " has been approved.");
+                    System.out.println("Company Rep " + repId + " has been " + (approve ? "approved" : "rejected") + ".");
                 } else {
                     lines.add(line);
                 }
